@@ -30,12 +30,14 @@ body {
   position: relative;
 }
 h1 { text-align: center; margin: 0 0 10px 0; }
+
 #tip-box {
   background: #222;
   padding: 12px 16px;
   border-radius: 10px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   font-size: 0.95rem;
   opacity: 0;
@@ -56,6 +58,19 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   justify-content: center;
   border-radius: 50%;
   flex-shrink: 0;
+}
+#tip-refresh {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+#tip-refresh svg {
+  stroke: #4caf50;
+  width: 18px;
+  height: 18px;
 }
 label, select {
   display: block;
@@ -171,6 +186,9 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
   <div id="tip-box">
     <div class="tip-icon">!</div>
     <div id="tip-text"></div>
+    <button id="tip-refresh" title="New Tip">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 1 1-2.83 2.83M1 1v6h6"/></svg>
+    </button>
   </div>
 
   <label>Number of Passwords:
@@ -248,6 +266,8 @@ function showRandomTip() {
   tipBox.style.animation = 'fadeInTip 0.5s forwards';
 }
 
+document.getElementById('tip-refresh').addEventListener('click', showRandomTip);
+
 // Password generator
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
@@ -297,10 +317,18 @@ lengthInput.addEventListener('input', () => {
 
 // Generate passwords
 btn.addEventListener('click', ()=>{
-  let num = parseInt(numSelect.value);
-  let lengthVal = parseInt(lengthInput.value);
-  if(lengthVal < 6) lengthVal = 6;
-  if(lengthVal > 48) lengthVal = 48;
+  const num = parseInt(numSelect.value);
+  const lengthVal = parseInt(lengthInput.value);
+
+  // Block generation if out of range
+  if(lengthVal < 6 || lengthVal > 48){
+    lengthMsg.textContent = lengthVal < 6 ? 
+      'Password length must be at least 6.' : 
+      'Password length cannot exceed 48.';
+    return;
+  }
+
+  lengthMsg.textContent = '';
 
   const opts = {
     uppercase: document.getElementById('uppercase').checked,
