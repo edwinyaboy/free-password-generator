@@ -264,18 +264,15 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 </div>
 
 <script>
-// ===== Tips =====
 const tips = [
-  "Use a mix of letters, numbers, and symbols","Avoid common words or sequences","Do not reuse passwords across accounts","Use a password manager for stronger passwords","Longer passwords are generally more secure","Avoid using personal information","Change passwords regularly for sensitive accounts","Enable two-factor authentication where possible","Randomly generated passwords are stronger than memorized ones","Check passwords against known breach databases","Use different passwords for email, banking, and social media","Avoid keyboard patterns like 'qwerty' or '12345'","Include both lowercase and uppercase letters","Use at least one number and one symbol","Avoid using your birthdate or name","Do not share your passwords with anyone","Update passwords immediately if a breach occurs","Consider using passphrases for memorability","Avoid dictionary words alone","Never write passwords on paper or sticky notes","Use long random strings for crypto wallets","Avoid reusing old passwords","Combine multiple unrelated words for a passphrase","Avoid sequential letters or numbers","Use browser password generators safely","Consider using hardware password managers for critical accounts","Check your passwords against 'Have I Been Pwned'","Do not save passwords in plain text files","Rotate passwords for work-related accounts","Regularly audit saved passwords for security"
+  "Use a mix of letters, numbers, and symbols","Avoid common words or sequences","Do not reuse passwords across accounts","Use a password manager","Longer passwords are generally more secure","Avoid using personal info","Change passwords regularly","Enable 2FA","Randomly generated passwords are stronger","Check passwords against breaches","Use different passwords for email, banking, social media","Avoid keyboard patterns","Include lowercase and uppercase","Use at least one number and one symbol","Avoid using your birthdate or name","Do not share passwords","Update immediately after breach","Consider passphrases","Avoid dictionary words","Never write passwords on paper","Use long random strings","Avoid reusing old passwords","Combine unrelated words","Avoid sequential letters/numbers","Use browser generators safely","Use hardware managers for critical accounts","Check 'Have I Been Pwned'","Do not save passwords in plain text","Rotate work passwords","Audit saved passwords"
 ];
 function showRandomTip() {
-  const index = Math.floor(Math.random()*tips.length);
-  document.getElementById('tip-text').textContent = tips[index];
+  document.getElementById('tip-text').textContent = tips[Math.floor(Math.random()*tips.length)];
 }
 document.getElementById('tip-refresh').addEventListener('click', showRandomTip);
 showRandomTip();
 
-// ===== Password Logic =====
 const passwordsContainer = document.getElementById('passwords-container');
 const generateBtn = document.getElementById('generate');
 const lengthInput = document.getElementById('length');
@@ -284,7 +281,10 @@ const uppercaseInput = document.getElementById('uppercase');
 const numbersInput = document.getElementById('numbers');
 const symbolsInput = document.getElementById('symbols');
 const showAllCheckbox = document.getElementById('showAllPasswords');
+const showFavBtn = document.getElementById('show-favorites');
+
 let favorites = [];
+let showingFavorites = false;
 
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
@@ -310,12 +310,13 @@ function renderPasswords(){
   const len = parseInt(lengthInput.value);
   if(len<6||len>48){ document.getElementById('length-msg').textContent='Length must be 6–48'; return;}
   document.getElementById('length-msg').textContent='';
-  for(let i=0;i<num;i++){
-    const pwd = generatePassword(len,{
-      uppercase: uppercaseInput.checked,
-      numbers: numbersInput.checked,
-      symbols: symbolsInput.checked
-    });
+  const itemsToShow = showingFavorites ? favorites : Array(num).fill().map(()=>generatePassword(len,{
+    uppercase: uppercaseInput.checked,
+    numbers: numbersInput.checked,
+    symbols: symbolsInput.checked
+  }));
+
+  itemsToShow.forEach(pwd=>{
     const box = document.createElement('div');
     box.className='password-box-wrapper';
     box.innerHTML=`
@@ -323,7 +324,7 @@ function renderPasswords(){
       <button class="show-btn" title="Show/Hide Password">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12c4-7 16-7 20 0-4 7-16 7-20 0z"/></svg>
       </button>
-      <button class="fav-btn" title="Favorite">
+      <button class="fav-btn ${favorites.includes(pwd)?'favorited':''}" title="Favorite">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.18L12 21z"/></svg>
       </button>
       <button class="breach-icon checking" title="Checking breach">
@@ -344,9 +345,8 @@ function renderPasswords(){
       setTimeout(()=>msg.remove(),1000);
     });
 
-    showBtn.addEventListener('click', ()=> {
-      if(pwdBox.style.filter==='blur(0px)'){ pwdBox.style.filter='blur(4px)'; }
-      else { pwdBox.style.filter='blur(0px)'; }
+    showBtn.addEventListener('click', ()=>{
+      pwdBox.style.filter = pwdBox.style.filter==='blur(0px)'?'blur(4px)':'blur(0px)';
     });
 
     favBtn.addEventListener('click', ()=>{
@@ -357,19 +357,33 @@ function renderPasswords(){
         favBtn.classList.add('favorited');
         favorites.push(pwd);
       }
+      if(showingFavorites) renderPasswords();
     });
 
-    // Fake breach check
+    // Simulated breach check with safe icon
     setTimeout(()=>{
       breachIcon.classList.remove('checking');
-      if(Math.random()<0.1){ breachIcon.classList.add('breached'); breachIcon.title='Breached'; }
-      else{ breachIcon.classList.add('safe'); breachIcon.title='Safe'; }
+      if(Math.random()<0.1){
+        breachIcon.classList.add('breached');
+        breachIcon.title='Breached';
+      } else {
+        breachIcon.classList.add('safe');
+        breachIcon.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>`;
+        breachIcon.title='Safe';
+      }
     }, 400);
 
     passwordsContainer.appendChild(box);
-  }
+  });
 }
-generateBtn.addEventListener('click', renderPasswords);
+
+generateBtn.addEventListener('click', ()=>{ showingFavorites=false; renderPasswords(); });
+
+showFavBtn.addEventListener('click', ()=>{
+  showingFavorites = !showingFavorites;
+  showFavBtn.textContent = showingFavorites?'Show All':'Show Favorites';
+  renderPasswords();
+});
 </script>
 </body>
 </html>
