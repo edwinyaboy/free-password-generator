@@ -31,6 +31,7 @@ body {
 }
 h1 { text-align: center; margin: 0 0 10px 0; }
 
+/* Tip Box */
 #tip-box {
   background: #222;
   padding: 12px 16px;
@@ -67,6 +68,7 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   height: 18px;
 }
 
+/* Checkboxes */
 .checkbox-wrapper {
   display: flex;
   align-items: center;
@@ -83,7 +85,6 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   border-radius: 4px;
   border: 2px solid #4caf50;
   background: #1c1c1c;
-  display: inline-block;
   position: relative;
 }
 .checkbox-wrapper input[type="checkbox"]:checked::after {
@@ -97,7 +98,12 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
+.checkbox-wrapper input[type="checkbox"]:focus {
+  outline: 2px solid #4caf50;
+  outline-offset: 2px;
+}
 
+/* Inputs & Buttons */
 input[type="number"], select {
   width: 100%;
   padding: 10px;
@@ -123,31 +129,40 @@ button:hover {
   background: linear-gradient(90deg,#32cd32,#4caf50);
   box-shadow: 0 0 10px #32cd32;
 }
+button:focus {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
 
+/* Password Boxes */
 .password-box-wrapper {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 6px;
+  padding-bottom: 10px; /* Added for better spacing on small screens */
+}
+.password-box-container {
+  flex: 1 1 45%;
+  min-width: 200px;
+  position: relative;
 }
 .password-box {
   background: #1c1c1c;
-  padding: 14px 40px 14px 14px;
+  padding: 14px;
   border-radius: 12px;
   word-break: break-all;
   font-family: monospace;
   font-size: 1.1rem;
   cursor: pointer;
   user-select: all;
-  flex: 1 1 45%;
-  min-width: 200px;
   filter: blur(4px);
   transition: filter 0.2s;
 }
 .password-box:hover { box-shadow: 0 0 12px rgba(50,205,50,0.6); }
 
+/* Icon Buttons */
 .show-btn, .fav-btn, .breach-icon {
   background: none;
   border: none;
@@ -156,39 +171,14 @@ button:hover {
   display: flex;
   align-items: center;
 }
-.show-btn svg, .fav-btn svg, .breach-icon svg {
-  width: 20px;
-  height: 20px;
-  stroke: #4caf50;
-}
+.show-btn svg, .fav-btn svg, .breach-icon svg { width: 20px; height: 20px; stroke: #4caf50; }
 .fav-btn.favorited svg { fill: #ffeb3b; stroke: #ffeb3b; }
 .breach-icon.checking svg { stroke: #ffeb3b; }
 .breach-icon.safe svg { stroke: #4caf50; }
 .breach-icon.breached svg { stroke: #f44336; }
+.breach-icon.error svg { stroke: #ff9800; }
 
-.strength-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-  flex-wrap: wrap;
-}
-.strength-bar {
-  flex: 1;
-  height: 12px;
-  border-radius: 6px;
-  background: #333;
-  overflow: hidden;
-}
-.strength-fill {
-  height: 100%;
-  width: 100%;
-  border-radius: 6px;
-  background: #4caf50;
-}
-.strength-label { font-size: 0.8rem; min-width: 70px; text-align: right; color: #ccc; }
-.crack-time { font-size: 0.75rem; color: #aaa; margin-left: 6px; flex-shrink: 0; }
-
+/* Copied Feedback */
 .copied-msg {
   position: absolute;
   left: 50%;
@@ -202,12 +192,33 @@ button:hover {
   z-index: 10;
 }
 
+/* Strength Indicator */
+.strength-indicator {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-top: 4px;
+  height: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #333;
+}
+.strength-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s;
+  border-radius: 6px;
+}
+.strength-weak .strength-fill { background: #f44336; width: 33%; }
+.strength-medium .strength-fill { background: #ffeb3b; width: 66%; }
+.strength-strong .strength-fill { background: #4caf50; width: 100%; }
+
 #length-msg { font-size:0.85rem; color:#aaa; margin-top:4px; }
 small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 
+/* Responsive */
 @media (max-width: 500px){
-  .password-box { flex: 1 1 100%; }
-  .strength-container { flex-direction: column; align-items: flex-start; }
+  .password-box-container { flex: 1 1 100%; }
+  .password-box-wrapper { flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 20px; }
 }
 </style>
 </head>
@@ -217,39 +228,37 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
   <div id="tip-box">
     <div class="tip-icon">!</div>
     <div id="tip-text"></div>
-    <button id="tip-refresh" title="New Tip">
+    <button id="tip-refresh" title="New Tip" aria-label="Refresh Tip">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 1 1-2.83 2.83M1 1v6h6"/></svg>
     </button>
   </div>
 
-  <label>Number of Passwords:
-    <select id="numPasswords">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-      <option value="10">10</option>
-    </select>
+  <label for="numPasswords">Number of Passwords:</label>
+  <select id="numPasswords" aria-label="Select number of passwords to generate"></select>
+
+  <label for="length">Password Length:</label>
+  <input type="number" id="length" min="6" max="48" value="16" aria-label="Enter password length (6-48)">
+  <div id="length-msg" role="alert"></div>
+
+  <label class="checkbox-wrapper">
+    <input type="checkbox" id="uppercase" checked aria-label="Include Uppercase Letters">
+    Include Uppercase
+  </label>
+  <label class="checkbox-wrapper">
+    <input type="checkbox" id="numbers" checked aria-label="Include Numbers">
+    Include Numbers
+  </label>
+  <label class="checkbox-wrapper">
+    <input type="checkbox" id="symbols" checked aria-label="Include Symbols">
+    Include Symbols
+  </label>
+  <label class="checkbox-wrapper">
+    <input type="checkbox" id="showAllPasswords" aria-label="Show All Passwords">
+    Show All Passwords
   </label>
 
-  <label>Password Length:
-    <input type="number" id="length" min="6" max="48" value="16">
-    <div id="length-msg"></div>
-  </label>
-
-  <label class="checkbox-wrapper"><input type="checkbox" id="uppercase" checked>Include Uppercase</label>
-  <label class="checkbox-wrapper"><input type="checkbox" id="numbers" checked>Include Numbers</label>
-  <label class="checkbox-wrapper"><input type="checkbox" id="symbols" checked>Include Symbols</label>
-
-  <label class="checkbox-wrapper"><input type="checkbox" id="showAllPasswords">Show All Passwords</label>
-
-  <button id="generate">Generate Password</button>
-  <button id="show-favorites">Show Favorites</button>
+  <button id="generate" aria-label="Generate Passwords">Generate Password</button>
+  <button id="show-favorites" aria-label="Toggle Show Favorites">Show Favorites</button>
 
   <div id="passwords-container"></div>
   <small>Click a password to copy it; long-press on mobile</small>
@@ -258,13 +267,9 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 <script>
 // ===== Tips =====
 const tips = [
-  "Use a mix of letters, numbers, and symbols","Avoid common words or sequences","Do not reuse passwords across accounts",
-  "Use a password manager","Longer passwords are generally more secure","Avoid using personal info","Change passwords regularly",
-  "Enable 2FA","Randomly generated passwords are stronger","Check passwords against breaches","Use different passwords for email, banking, social media",
-  "Avoid keyboard patterns","Include lowercase and uppercase","Use at least one number and one symbol","Avoid using your birthdate or name",
-  "Do not share passwords","Update immediately after breach","Consider passphrases","Avoid dictionary words","Never write passwords on paper",
-  "Use long random strings","Avoid reusing old passwords","Combine unrelated words","Avoid sequential letters/numbers",
-  "Use browser generators safely","Use hardware managers for critical accounts","Check 'Have I Been Pwned'","Do not save passwords in plain text","Rotate work passwords","Audit saved passwords"
+  "Use a mix of letters, numbers, and symbols","Avoid common words","Do not reuse passwords","Use a password manager",
+  "Longer passwords are generally more secure","Enable 2FA","Randomly generated passwords are stronger","Check passwords against breaches",
+  "Avoid keyboard patterns","Include lowercase and uppercase","Use at least one number and one symbol"
 ];
 function showRandomTip(){ document.getElementById('tip-text').textContent = tips[Math.floor(Math.random()*tips.length)]; }
 document.getElementById('tip-refresh').addEventListener('click', showRandomTip);
@@ -278,131 +283,227 @@ const numPasswordsSelect = document.getElementById('numPasswords');
 const uppercaseInput = document.getElementById('uppercase');
 const numbersInput = document.getElementById('numbers');
 const symbolsInput = document.getElementById('symbols');
-const showAllCheckbox = document.getElementById('showAllPasswords');
+const showAllPasswordsInput = document.getElementById('showAllPasswords');
 const showFavBtn = document.getElementById('show-favorites');
 
-let favorites = [];
+let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 let showingFavorites = false;
 
+// Populate numPasswords select dynamically
+numPasswordsSelect.innerHTML = [...Array(10)].map((_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('');
+
 // ===== Password Generator =====
-function generatePassword(length, opts){
+function generatePassword(length, opts) {
+  if (!opts.uppercase && !opts.numbers && !opts.symbols) {
+    alert('At least one character type (uppercase, numbers, or symbols) must be selected.');
+    return null;
+  }
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const numbers = '0123456789';
   const symbols = '!@#$%^&*()_+[]{}|;:,.<>?/~';
   let pwd = [];
-  if(opts.uppercase) pwd.push(upper[Math.floor(Math.random()*upper.length)]);
-  if(opts.numbers) pwd.push(numbers[Math.floor(Math.random()*numbers.length)]);
-  if(opts.symbols) pwd.push(symbols[Math.floor(Math.random()*symbols.length)]);
+  if (opts.uppercase) pwd.push(upper[Math.floor(Math.random() * upper.length)]);
+  if (opts.numbers) pwd.push(numbers[Math.floor(Math.random() * numbers.length)]);
+  if (opts.symbols) pwd.push(symbols[Math.floor(Math.random() * symbols.length)]);
   const allChars = lower + (opts.uppercase ? upper : '') + (opts.numbers ? numbers : '') + (opts.symbols ? symbols : '');
-  while(pwd.length < length) pwd.push(allChars[Math.floor(Math.random()*allChars.length)]);
-  for(let i=pwd.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pwd[i],pwd[j]]=[pwd[j],pwd[i]]; }
+  while (pwd.length < length) pwd.push(allChars[Math.floor(Math.random() * allChars.length)]);
+  for (let i = pwd.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
+  }
   return pwd.join('');
 }
 
 // ===== SHA-1 Hash =====
-async function sha1(str){ const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(str)); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase(); }
+async function sha1(str) {
+  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
 
-// ===== Check Breach =====
-async function checkBreach(password, breachIcon){
+// ===== Check Breach with Delay for Rate Limiting =====
+async function checkBreach(password, breachIcon) {
   breachIcon.classList.add('checking');
   const hash = await sha1(password);
-  const prefix = hash.slice(0,5);
+  const prefix = hash.slice(0, 5);
   const suffix = hash.slice(5);
-  try{
+  try {
+    // Add delay to respect API rate limits (1.5s per request)
+    await new Promise(resolve => setTimeout(resolve, 1500));
     const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+    if (!res.ok) throw new Error('API error');
     const text = await res.text();
-    const found = text.split('\n').some(line=>line.split(':')[0].trim()===suffix);
+    const found = text.split('\n').some(line => line.split(':')[0].trim() === suffix);
     breachIcon.classList.remove('checking');
-    if(found){
+    if (found) {
       breachIcon.classList.add('breached');
       breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f44336" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>`;
-      breachIcon.title='Breached';
+      breachIcon.title = 'Breached';
+      breachIcon.setAttribute('aria-label', 'Password has been breached');
     } else {
       breachIcon.classList.add('safe');
       breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>`;
-      breachIcon.title='Safe';
+      breachIcon.title = 'Safe';
+      breachIcon.setAttribute('aria-label', 'Password is safe');
     }
-  }catch(e){
+  } catch (e) {
     breachIcon.classList.remove('checking');
-    breachIcon.classList.add('safe');
-    breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>`;
-    breachIcon.title='Safe';
+    breachIcon.classList.add('error');
+    breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ff9800" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`;
+    breachIcon.title = 'Error checking breach';
+    breachIcon.setAttribute('aria-label', 'Error checking password breach');
   }
 }
 
+// ===== Get Password Strength =====
+function getPasswordStrength(pwd) {
+  let score = pwd.length;
+  if (/[A-Z]/.test(pwd)) score += 10;
+  if (/[0-9]/.test(pwd)) score += 10;
+  if (/[^A-Za-z0-9]/.test(pwd)) score += 10;
+  if (score < 20) return { text: 'Weak', class: 'strength-weak' };
+  if (score < 30) return { text: 'Medium', class: 'strength-medium' };
+  return { text: 'Strong', class: 'strength-strong' };
+}
+
 // ===== Render Passwords =====
-function renderPasswords(){
-  passwordsContainer.innerHTML='';
+function renderPasswords() {
+  passwordsContainer.innerHTML = '';
   const num = parseInt(numPasswordsSelect.value);
   const len = parseInt(lengthInput.value);
-  if(len<6||len>48){ document.getElementById('length-msg').textContent='Length must be 6–48'; return; }
-  document.getElementById('length-msg').textContent='';
+  if (len < 6 || len > 48) {
+    document.getElementById('length-msg').textContent = 'Length must be 6–48';
+    return;
+  }
+  document.getElementById('length-msg').textContent = '';
 
-  const items = showingFavorites ? favorites : Array(num).fill().map(()=>generatePassword(len,{
+  const opts = {
     uppercase: uppercaseInput.checked,
     numbers: numbersInput.checked,
     symbols: symbolsInput.checked
-  }));
+  };
 
-  items.forEach(pwd=>{
+  const items = showingFavorites ? favorites : Array(num).fill().map(() => generatePassword(len, opts)).filter(pwd => pwd !== null);
+
+  if (items.length === 0) return; // No passwords if validation fails
+
+  items.forEach(pwd => {
     const wrapper = document.createElement('div');
-    wrapper.className='password-box-wrapper';
-    wrapper.innerHTML=`
-      <div class="password-box" title="Click to copy">${pwd}</div>
-      <button class="show-btn" title="Show/Hide Password">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12c4-7 16-7 20 0-4 7-16 7-20 0z"/></svg>
-      </button>
-      <button class="fav-btn ${favorites.includes(pwd)?'favorited':''}" title="Favorite">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.18L12 21z"/></svg>
-      </button>
-      <button class="breach-icon checking" title="Checking breach">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ffeb3b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      </button>
-    `;
-    const pwdBox = wrapper.querySelector('.password-box');
-    const showBtn = wrapper.querySelector('.show-btn');
-    const favBtn = wrapper.querySelector('.fav-btn');
-    const breachIcon = wrapper.querySelector('.breach-icon');
+    wrapper.className = 'password-box-wrapper';
 
-    // Copy password
-    pwdBox.addEventListener('click', ()=>{
-      navigator.clipboard.writeText(pwd);
-      const msg = document.createElement('div');
-      msg.className='copied-msg';
-      msg.textContent='Copied!';
-      document.body.appendChild(msg);
-      setTimeout(()=>msg.remove(),1000);
+    const container = document.createElement('div');
+    container.className = 'password-box-container';
+
+    const pwdBox = document.createElement('div');
+    pwdBox.className = 'password-box';
+    pwdBox.textContent = pwd; // Safe insertion
+    pwdBox.title = 'Click to copy';
+    pwdBox.setAttribute('role', 'textbox');
+    pwdBox.setAttribute('aria-readonly', 'true');
+    pwdBox.setAttribute('aria-label', `Password: ${pwd} (blurred)`);
+    pwdBox.setAttribute('tabindex', '0'); // Keyboard accessible
+
+    const strength = getPasswordStrength(pwd);
+    const strengthIndicator = document.createElement('div');
+    strengthIndicator.className = `strength-indicator ${strength.class}`;
+    const fill = document.createElement('div');
+    fill.className = 'strength-fill';
+    strengthIndicator.appendChild(fill);
+    strengthIndicator.setAttribute('aria-live', 'polite');
+
+    const showBtn = document.createElement('button');
+    showBtn.className = 'show-btn';
+    showBtn.title = 'Show/Hide Password';
+    showBtn.setAttribute('aria-label', 'Toggle password visibility');
+    showBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12c4-7 16-7 20 0-4 7-16 7-20 0z"/></svg>`;
+
+    const favBtn = document.createElement('button');
+    favBtn.className = `fav-btn ${favorites.includes(pwd) ? 'favorited' : ''}`;
+    favBtn.title = 'Favorite';
+    favBtn.setAttribute('aria-label', 'Toggle favorite');
+    favBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.18L12 21z"/></svg>`;
+
+    const breachIcon = document.createElement('button');
+    breachIcon.className = 'breach-icon checking';
+    breachIcon.title = 'Checking breach';
+    breachIcon.setAttribute('aria-label', 'Checking if password has been breached');
+    breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ffeb3b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`;
+
+    container.appendChild(pwdBox);
+    container.appendChild(strengthIndicator);
+    wrapper.appendChild(container);
+    wrapper.appendChild(showBtn);
+    wrapper.appendChild(favBtn);
+    wrapper.appendChild(breachIcon);
+    passwordsContainer.appendChild(wrapper);
+
+    pwdBox.addEventListener('click', () => {
+      navigator.clipboard.writeText(pwd).then(() => {
+        const msg = document.createElement('div');
+        msg.className = 'copied-msg';
+        msg.textContent = 'Copied!';
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 1000);
+      }).catch(err => console.error('Clipboard error:', err));
     });
 
-    // Toggle blur
-    showBtn.addEventListener('click', ()=>{ pwdBox.style.filter = pwdBox.style.filter==='blur(0px)'?'blur(4px)':'blur(0px)'; });
+    pwdBox.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') pwdBox.click();
+    });
 
-    // Toggle favorites
-    favBtn.addEventListener('click', ()=>{
-      if(favBtn.classList.contains('favorited')){
+    showBtn.addEventListener('click', () => {
+      const isShown = pwdBox.style.filter === 'blur(0px)';
+      pwdBox.style.filter = isShown ? 'blur(4px)' : 'blur(0px)';
+      pwdBox.setAttribute('aria-label', `Password: ${pwd} (${isShown ? 'blurred' : 'visible'})`);
+    });
+
+    favBtn.addEventListener('click', () => {
+      if (favBtn.classList.contains('favorited')) {
         favBtn.classList.remove('favorited');
-        favorites = favorites.filter(f=>f!==pwd);
+        favorites = favorites.filter(f => f !== pwd);
       } else {
         favBtn.classList.add('favorited');
         favorites.push(pwd);
       }
-      if(showingFavorites) renderPasswords();
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      if (showingFavorites) renderPasswords();
     });
 
-    // Check breach
     checkBreach(pwd, breachIcon);
+  });
 
-    passwordsContainer.appendChild(wrapper);
+  // Apply showAllPasswords state
+  toggleAllPasswords(showAllPasswordsInput.checked);
+}
+
+// ===== Toggle All Passwords Visibility =====
+function toggleAllPasswords(show) {
+  const passwordBoxes = document.querySelectorAll('.password-box');
+  const showBtns = document.querySelectorAll('.show-btn');
+  passwordBoxes.forEach((box, index) => {
+    const pwd = box.textContent;
+    box.style.filter = show ? 'blur(0px)' : 'blur(4px)';
+    box.setAttribute('aria-label', `Password: ${pwd} (${show ? 'visible' : 'blurred'})`);
+    // Disable individual show buttons when all are shown
+    showBtns[index].disabled = show;
   });
 }
 
 // ===== Events =====
-generateBtn.addEventListener('click', ()=>{ showingFavorites=false; renderPasswords(); });
-showFavBtn.addEventListener('click', ()=>{
-  showingFavorites=!showingFavorites;
-  showFavBtn.textContent = showingFavorites?'Show All':'Show Favorites';
+generateBtn.addEventListener('click', () => {
+  showingFavorites = false;
+  showFavBtn.textContent = 'Show Favorites';
   renderPasswords();
+});
+
+showFavBtn.addEventListener('click', () => {
+  showingFavorites = !showingFavorites;
+  showFavBtn.textContent = showingFavorites ? 'Show All' : 'Show Favorites';
+  renderPasswords();
+});
+
+showAllPasswordsInput.addEventListener('change', (e) => {
+  toggleAllPasswords(e.target.checked);
 });
 </script>
 </body>
