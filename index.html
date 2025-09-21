@@ -107,7 +107,7 @@ button:hover { background: #45a049; }
   height: 100%;
   width: 100%;
   border-radius: 6px;
-  background: #4caf50; /* Always Very Strong */
+  background: #4caf50;
 }
 .strength-label {
   font-size: 0.8rem;
@@ -123,7 +123,7 @@ small { display: block; margin-top: 6px; color: #aaa; }
 <div class="container">
   <div id="tip-box">
     <div class="tip-icon">!</div>
-    <div id="tip-text">Tip appears here</div>
+    <div id="tip-text"></div>
   </div>
 
   <label>Number of Passwords:
@@ -148,14 +148,14 @@ small { display: block; margin-top: 6px; color: #aaa; }
   <label><input type="checkbox" id="numbers" checked>Include Numbers</label>
   <label><input type="checkbox" id="symbols" checked>Include Symbols</label>
 
-  <button id="generate">Generate Passwords</button>
+  <button id="generate">Generate Password</button>
 
   <div id="passwords-container"></div>
   <small>Click a password to copy it</small>
 </div>
 
 <script>
-// Password tips
+// 30 password tips
 const tips = [
   "Use a mix of letters, numbers, and symbols.",
   "Avoid common words or sequences.",
@@ -166,10 +166,31 @@ const tips = [
   "Change passwords regularly for sensitive accounts.",
   "Enable two-factor authentication where possible.",
   "Randomly generated passwords are stronger than memorized ones.",
-  "Check passwords against known breach databases."
+  "Check passwords against known breach databases.",
+  "Use different passwords for email, banking, and social media.",
+  "Avoid keyboard patterns like 'qwerty' or '12345'.",
+  "Include both lowercase and uppercase letters.",
+  "Use at least one number and one symbol.",
+  "Avoid using your birthdate or name.",
+  "Do not share your passwords with anyone.",
+  "Update passwords immediately if a breach occurs.",
+  "Consider using passphrases for memorability.",
+  "Avoid dictionary words alone.",
+  "Never write passwords on paper or sticky notes.",
+  "Use long random strings for crypto wallets.",
+  "Avoid reusing old passwords.",
+  "Combine multiple unrelated words for a passphrase.",
+  "Avoid sequential letters or numbers.",
+  "Use browser password generators safely.",
+  "Consider using hardware password managers for critical accounts.",
+  "Check your passwords against 'Have I Been Pwned'.",
+  "Do not save passwords in plain text files.",
+  "Rotate passwords for work-related accounts.",
+  "Regularly audit saved passwords for security."
 ];
+
 function showRandomTip() {
-  const index = Math.floor(Math.random() * tips.length);
+  const index = Math.floor(Math.random()*tips.length);
   document.getElementById('tip-text').textContent = tips[index];
 }
 
@@ -182,7 +203,6 @@ function generatePassword(length, opts){
 
   let pwd = [];
 
-  // Always include at least one of each type if selected
   if(opts.uppercase) pwd.push(upper[Math.floor(Math.random()*upper.length)]);
   if(opts.numbers) pwd.push(numbers[Math.floor(Math.random()*numbers.length)]);
   if(opts.symbols) pwd.push(symbols[Math.floor(Math.random()*symbols.length)]);
@@ -193,8 +213,8 @@ function generatePassword(length, opts){
     pwd.push(allChars[Math.floor(Math.random()*allChars.length)]);
   }
 
-  // Shuffle array
-  for(let i = pwd.length-1; i>0; i--){
+  // Shuffle
+  for(let i=pwd.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
   }
@@ -212,7 +232,11 @@ document.getElementById('generate').addEventListener('click', ()=>{
     numbers: document.getElementById('numbers').checked,
     symbols: document.getElementById('symbols').checked
   };
-  
+
+  // Update button text
+  const btn = document.getElementById('generate');
+  btn.textContent = num===1 ? "Generate Password" : "Generate Passwords";
+
   const container = document.getElementById('passwords-container');
   container.innerHTML = '';
   showRandomTip();
@@ -250,6 +274,9 @@ document.getElementById('generate').addEventListener('click', ()=>{
     container.appendChild(strengthContainer);
   }
 });
+
+// Show initial tip on load
+showRandomTip();
 </script>
 </body>
 </html>
