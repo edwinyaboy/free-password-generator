@@ -308,6 +308,47 @@ function generatePassword(length, opts){
   return pwd.join('');
 }
 
+// ===== SHA-1 Hash (for HIBP k-anonymity) =====
+async function sha1(str) {
+  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+
+// ===== Check Password Breach =====
+async function checkBreach(password, breachIcon){
+  const hash = await sha1(password);
+  const prefix = hash.slice(0,5);
+  const suffix = hash.slice(5);
+  try {
+    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+    const text = await res.text();
+    const lines = text.split('\n');
+    let found = false;
+    for(let line of lines){
+      const [hashSuffix,count] = line.split(':');
+      if(hashSuffix.trim() === suffix){
+        found = true;
+        break;
+      }
+    }
+    breachIcon.classList.remove('checking');
+    if(found){
+      breachIcon.classList.add('breached');
+      breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f44336" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>`;
+      breachIcon.title='Breached';
+    } else {
+      breachIcon.classList.add('safe');
+      breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>`;
+      breachIcon.title='Safe';
+    }
+  } catch(err){
+    breachIcon.classList.remove('checking');
+    breachIcon.classList.add('safe');
+    breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>`;
+    breachIcon.title='Safe';
+  }
+}
+
 // ===== Render Passwords =====
 function renderPasswords(){
   passwordsContainer.innerHTML='';
@@ -372,19 +413,8 @@ function renderPasswords(){
       if(showingFavorites) renderPasswords();
     });
 
-    // Simulated breach check
-    setTimeout(()=>{
-      breachIcon.classList.remove('checking');
-      if(Math.random()<0.1){
-        breachIcon.classList.add('breached');
-        breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f44336" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>`;
-        breachIcon.title='Breached';
-      } else {
-        breachIcon.classList.add('safe');
-        breachIcon.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>`;
-        breachIcon.title='Safe';
-      }
-    }, 400);
+    // Check real breach
+    checkBreach(pwd, breachIcon);
 
     passwordsContainer.appendChild(box);
   });
