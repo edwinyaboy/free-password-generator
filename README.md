@@ -1,80 +1,58 @@
-<h1 align="center">🔒 Free Password Generator</h1>
+# 🔒 Free Password Generator
 
-<p align="center">
-  <a href="https://edwinyaboy.github.io/free-password-generator/">
-    <img src="https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge" alt="Live Demo">
-  </a>
-  <img src="https://img.shields.io/badge/Open%20Source-MIT-green?style=for-the-badge" alt="Open Source">
-  <img src="https://img.shields.io/badge/Secure-Client--Side-blue?style=for-the-badge" alt="Secure">
-  <img src="https://img.shields.io/badge/HIBP-Breach%20Check-orange?style=for-the-badge" alt="HIBP">
-</p>
+[![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge&logo=github-pages)](https://edwinyaboy.github.io/free-password-generator/) 
+[![Open Source](https://img.shields.io/badge/Open%20Source-MIT-green?style=for-the-badge)](https://github.com/edwinyaboy/free-password-generator) 
+[![Secure](https://img.shields.io/badge/Secure-Client%20Side-blue?style=for-the-badge)](https://edwinyaboy.github.io/free-password-generator/)
+[![HIBP Check](https://img.shields.io/badge/HIBP-Breach%20Check-orange?style=for-the-badge)](https://haveibeenpwned.com/)
+
+**Open Source | Secure | Client-Side | HIBP Breach Check**
 
 ---
 
-## ✨ Overview
+## 🎯 Features
 
-<p style="font-size:1rem">
-<strong>Free Password Generator</strong> is a lightweight, browser-based tool for creating <strong>strong, random passwords</strong>.  
-All code is <strong>open source</strong> and runs entirely in your browser — no servers needed.  
+- 🔑 **Strong Password Generation**  
+  Fully customizable length (6–48) and character sets (uppercase, numbers, symbols).  
 
-It includes <strong>real-time breach checking</strong> via <a href="https://haveibeenpwned.com/" target="_blank">Have I Been Pwned (HIBP)</a>, ensuring your passwords haven’t been exposed in leaks.
-</p>
+- 🛡️ **HIBP Breach Check**  
+  Checks passwords against [Have I Been Pwned](https://haveibeenpwned.com/) securely — only hashes are sent.  
 
----
+- 📊 **Password Strength Indicator**  
+  Weak ⚪, Medium 🟡, Strong 🟢 visual feedback.  
 
-## 🚀 Features
+- ⭐ **Favorites System**  
+  Save and quickly access your preferred passwords.  
 
-<ul>
-<li>🔑 <strong>Strong Password Generation:</strong> Fully customizable length and character sets (uppercase, numbers, symbols).</li>
-<li>🛡️ <strong>Breach Check (HIBP):</strong> Securely checks passwords without sending full passwords over the network.</li>
-<li>📊 <strong>Password Strength Indicator:</strong> Visual feedback: Weak, Medium, Strong.</li>
-<li>⭐ <strong>Favorites System:</strong> Save and easily access preferred passwords.</li>
-<li>📋 <strong>Copy to Clipboard:</strong> Click or long-press (mobile) to copy passwords instantly.</li>
-<li>👁️ <strong>Show/Hide Passwords:</strong> Blur/unblur for privacy; show all option available.</li>
-<li>🌐 <strong>Client-Side Only:</strong> Everything runs in-browser; nothing is stored on a server.</li>
-<li>📱 <strong>Responsive & Accessible:</strong> Mobile-friendly and ARIA-compliant.</li>
-<li>🛠️ <strong>Open Source:</strong> Fully open-source and community-friendly.</li>
-</ul>
+- 📋 **Copy to Clipboard**  
+  Click or long-press on mobile to copy a password easily.  
 
----
+- 👁️ **Show/Hide Passwords**  
+  Toggle visibility to see your passwords clearly.  
 
-## ⚡ How to Use
+- 🌐 **Client-Side Only**  
+  Runs entirely in the browser — no server storage.  
 
-<ol>
-<li>Open the <a href="https://edwinyaboy.github.io/free-password-generator/">live generator</a>.</li>
-<li>Choose the number of passwords and desired length.</li>
-<li>Toggle options: uppercase letters, numbers, symbols.</li>
-<li>Click <strong>Generate Password</strong>.</li>
-<li>Copy, favorite, or check passwords for breaches as needed.</li>
-</ol>
+- 📱 **Responsive & Accessible**  
+  Works on mobile and desktop, ARIA-compliant for accessibility.  
+
+- 🛠️ **Open Source**  
+  MIT License — free to use, modify, and share.
 
 ---
 
-## 🛡️ Security Notes
+## 💻 Example Passwords
 
-<p style="font-size:1rem">
-<ul>
-<li><strong>Client-side generation:</strong> Your passwords never leave your browser.</li>
-<li><strong>HIBP breach checks:</strong> Use SHA-1 prefixes so full passwords are never transmitted.</li>
-<li><strong>Do not reuse passwords</strong> across multiple sites.</li>
-</ul>
-</p>
+| Password           | Strength | Breach Status |
+|------------------|:--------:|:-------------:|
+| `T8y$3qW!aP2#`    | 🟡 Medium | ✅ Safe       |
+| `F@9m*7bKz!Dq`    | 🟢 Strong | ❌ Breached   |
+| `Y#2pL9@b!Qx`     | 🔴 Weak   | ⚠️ Error      |
 
----
-
-## 📜 License
-
-<p style="font-size:1rem">MIT License — free to use, modify, and distribute.</p>
+> **Note:** Passwords above are examples — live passwords are generated randomly and checked against HIBP.
 
 ---
 
-<h3 align="center">🔗 Live Demo</h3>
-<p align="center">
-  <a href="https://edwinyaboy.github.io/free-password-generator/" target="_blank">
-    <strong>Click here to try it now!</strong>
-  </a>
-</p>
+## 🔗 Try It Live
 
-<p align="center">
-    <strong>I will update this randomly.</strong>
-</p>
+[Click here to generate your secure passwords!](https://edwinyaboy.github.io/free-password-generator/)
+
