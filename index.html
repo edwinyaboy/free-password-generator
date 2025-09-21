@@ -3,123 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Secure password generator for gamers, crypto users, and OSRS accounts. Generates strong passwords with strength meter and tips.">
+<meta name="description" content="Secure password generator with multiple password generation, strength bars, and tips.">
 <title>Secure Password Generator</title>
 <style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #000000; /* fully black page */
-    color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    min-height: 100vh;
-  }
-  h1 {
-    margin-bottom: 10px;
-    text-align: center;
-  }
-  .container {
-    background: #1e1e1e; /* dark gray container for contrast */
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  #tip-box {
-    background: #2a2a2a;
-    padding: 10px 12px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    font-size: 0.95rem;
-    color: #fff;
-    gap: 8px;
-  }
-  .tip-icon {
-    background: #ffeb3b;
-    color: #000;
-    font-weight: bold;
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  label {
-    display: block;
-    font-size: 0.9rem;
-  }
-  input[type="number"] {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: none;
-    margin-top: 4px;
-    font-size: 1rem;
-    background: #2a2a2a;
-    color: #f0f0f0;
-  }
-  input[type="checkbox"] {
-    margin-right: 6px;
-  }
-  button {
-    padding: 10px;
-    background: #4caf50;
-    color: #fff;
-    border: none;
-    font-size: 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  button:hover { background: #45a049; }
-  #password {
-    margin-top: 8px;
-    background: #2a2a2a;
-    padding: 10px;
-    border-radius: 8px;
-    word-break: break-all;
-    font-family: monospace;
-    font-size: 1.1rem;
-    text-align: center;
-    cursor: pointer;
-    user-select: all;
-  }
-  #strength {
-    height: 12px;
-    width: 100%;
-    background: #333;
-    border-radius: 6px;
-    margin-top: 8px;
-    overflow: hidden;
-  }
-  #strength-bar {
-    height: 100%;
-    width: 0%;
-    transition: width 0.3s;
-    border-radius: 6px;
-    background: linear-gradient(90deg, #f44336, #ff9800, #cddc39, #4caf50);
-    background-size: 400% 100%;
-    animation: gradientMove 3s linear infinite;
-  }
-  @keyframes gradientMove {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 0%; }
-  }
-  small {
-    display: block;
-    margin-top: 6px;
-    color: #aaa;
-  }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #000000;
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+h1 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+.container {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#tip-box {
+  background: #2a2a2a;
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #fff;
+  gap: 8px;
+}
+.tip-icon {
+  background: #ffeb3b;
+  color: #000;
+  font-weight: bold;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+label, select {
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+input[type="number"], select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  margin-top: 4px;
+  font-size: 1rem;
+  background: #2a2a2a;
+  color: #f0f0f0;
+}
+input[type="checkbox"] {
+  margin-right: 6px;
+}
+button {
+  padding: 10px;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+button:hover { background: #45a049; }
+.password-box {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 8px;
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 1.1rem;
+  text-align: center;
+  cursor: pointer;
+  user-select: all;
+  margin-top: 6px;
+}
+.strength-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.strength-bar {
+  flex: 1;
+  height: 12px;
+  border-radius: 6px;
+  background: #333;
+  overflow: hidden;
+}
+.strength-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+.strength-label {
+  font-size: 0.8rem;
+  min-width: 70px;
+  text-align: right;
+  color: #ccc;
+}
+small {
+  display: block;
+  margin-top: 6px;
+  color: #aaa;
+}
 </style>
 </head>
 <body>
@@ -130,19 +135,55 @@
     <div id="tip-text">Tip appears here</div>
   </div>
 
+  <label>Number of Passwords:
+    <select id="numPasswords">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+  </label>
+
   <label>Password Length:
     <input type="number" id="length" min="6" max="48" value="16">
   </label>
   <label><input type="checkbox" id="uppercase" checked>Include Uppercase</label>
   <label><input type="checkbox" id="numbers" checked>Include Numbers</label>
   <label><input type="checkbox" id="symbols" checked>Include Symbols</label>
-  <button id="generate">Generate Password</button>
-  <div id="password" title="Click to copy">Click Generate</div>
-  <div id="strength"><div id="strength-bar"></div></div>
-  <small>Click the password to copy it to clipboard</small>
+
+  <button id="generate">Generate Passwords</button>
+
+  <div id="passwords-container"></div>
+  <small>Click a password to copy it</small>
 </div>
 
 <script>
+// Password tips
+const tips = [
+  "Use a mix of letters, numbers, and symbols.",
+  "Avoid common words or sequences.",
+  "Do not reuse passwords across accounts.",
+  "Use a password manager for stronger passwords.",
+  "Longer passwords are generally more secure.",
+  "Avoid using personal information.",
+  "Change passwords regularly for sensitive accounts.",
+  "Enable two-factor authentication where possible.",
+  "Randomly generated passwords are stronger than memorized ones.",
+  "Check passwords against known breach databases."
+];
+
+// Show random tip
+function showRandomTip() {
+  const index = Math.floor(Math.random() * tips.length);
+  document.getElementById('tip-text').textContent = tips[index];
+}
+
 // Password generation
 function generatePassword(length, opts) {
   const lower = 'abcdefghijklmnopqrstuvwxyz';
@@ -161,7 +202,7 @@ function generatePassword(length, opts) {
   return pwd;
 }
 
-// Strength calculation
+// Password strength
 function checkStrength(pwd) {
   let score = 0;
   if(pwd.length >= 8) score++;
@@ -171,32 +212,19 @@ function checkStrength(pwd) {
   return score; // 0-4
 }
 
-const passwordEl = document.getElementById('password');
-const strengthBar = document.getElementById('strength-bar');
-const tipText = document.getElementById('tip-text');
-
-// Password tips array
-const tips = [
-  "Use a mix of letters, numbers, and symbols.",
-  "Avoid common words or sequences.",
-  "Do not reuse passwords across accounts.",
-  "Use a password manager for stronger passwords.",
-  "Longer passwords are generally more secure.",
-  "Avoid using personal information.",
-  "Change passwords regularly for sensitive accounts.",
-  "Enable two-factor authentication where possible.",
-  "Randomly generated passwords are stronger than memorized ones.",
-  "Check passwords against known breach databases."
-];
-
-// Show random tip
-function showRandomTip() {
-  const index = Math.floor(Math.random() * tips.length);
-  tipText.textContent = tips[index];
+function strengthColor(score){
+  switch(score){
+    case 0:
+    case 1: return {color:'#f44336', label:'Weak'};
+    case 2: return {color:'#ff9800', label:'Moderate'};
+    case 3: return {color:'#cddc39', label:'Strong'};
+    case 4: return {color:'#4caf50', label:'Very Strong'};
+  }
 }
 
-// Generate password
+// Generate multiple passwords
 document.getElementById('generate').addEventListener('click', ()=>{
+  const num = parseInt(document.getElementById('numPasswords').value);
   const lengthInput = parseInt(document.getElementById('length').value);
   const length = Math.min(48, Math.max(6, lengthInput));
   const opts = {
@@ -204,25 +232,48 @@ document.getElementById('generate').addEventListener('click', ()=>{
     numbers: document.getElementById('numbers').checked,
     symbols: document.getElementById('symbols').checked
   };
-  const pwd = generatePassword(length, opts);
-  passwordEl.textContent = pwd;
+  
+  const container = document.getElementById('passwords-container');
+  container.innerHTML = '';
+  showRandomTip();
 
-  const score = checkStrength(pwd);
-  const percent = (score/4)*100;
-  strengthBar.style.width = percent+'%';
+  for(let i=0;i<num;i++){
+    const pwd = generatePassword(length, opts);
+    const score = checkStrength(pwd);
+    const {color,label} = strengthColor(score);
+
+    const pwdDiv = document.createElement('div');
+    pwdDiv.className = 'password-box';
+    pwdDiv.textContent = pwd;
+    pwdDiv.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(pwd).then(()=>{
+        pwdDiv.textContent = 'Copied! ✅';
+        setTimeout(()=>{ pwdDiv.textContent = pwd; },1000);
+      });
+    });
+
+    const strengthContainer = document.createElement('div');
+    strengthContainer.className = 'strength-container';
+
+    const bar = document.createElement('div');
+    bar.className = 'strength-bar';
+    const fill = document.createElement('div');
+    fill.className = 'strength-fill';
+    fill.style.width = ((score/4)*100)+'%';
+    fill.style.background = color;
+    bar.appendChild(fill);
+
+    const strengthLabel = document.createElement('div');
+    strengthLabel.className = 'strength-label';
+    strengthLabel.textContent = label;
+
+    strengthContainer.appendChild(bar);
+    strengthContainer.appendChild(strengthLabel);
+
+    container.appendChild(pwdDiv);
+    container.appendChild(strengthContainer);
+  }
 });
-
-// Copy password
-passwordEl.addEventListener('click', ()=>{
-  const text = passwordEl.textContent;
-  navigator.clipboard.writeText(text).then(()=>{
-    passwordEl.textContent = 'Copied! ✅';
-    setTimeout(()=>{ passwordEl.textContent = text; },1000);
-  });
-});
-
-// Show tip on load
-showRandomTip();
 </script>
 </body>
 </html>
