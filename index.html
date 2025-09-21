@@ -88,22 +88,37 @@ button:hover {
   background: linear-gradient(90deg,#32cd32,#4caf50);
   box-shadow: 0 0 10px #32cd32;
 }
+.password-box-wrapper {
+  position: relative;
+}
 .password-box {
   background: #1c1c1c;
-  padding: 14px;
+  padding: 14px 40px 14px 14px;
   border-radius: 12px;
   word-break: break-all;
   font-family: monospace;
   font-size: 1.1rem;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
   user-select: all;
   margin-top: 6px;
   transition: 0.2s;
   box-shadow: 0 2px 8px rgba(0,255,0,0.1);
+  filter: blur(4px);
 }
 .password-box:hover {
   box-shadow: 0 0 12px rgba(50,205,50,0.6);
+}
+.show-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #4caf50;
+  cursor: pointer;
+  font-size: 1.1rem;
 }
 .strength-container {
   display: flex;
@@ -131,40 +146,6 @@ button:hover {
   color: #ccc;
 }
 small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
-
-/* Circular loader/checkmark */
-#loader-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  z-index: 100;
-}
-#loader {
-  width: 80px;
-  height: 80px;
-}
-circle {
-  fill: none;
-  stroke: #32cd32;
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-dasharray: 251.2; /* 2πr for r=40 */
-  stroke-dashoffset: 251.2;
-}
-#checkmark {
-  stroke-dasharray: 34;
-  stroke-dashoffset: 34;
-  stroke-width: 6;
-  stroke: #32cd32;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 </style>
 </head>
 <body>
@@ -201,15 +182,6 @@ circle {
 
   <div id="passwords-container"></div>
   <small>Click a password to copy it</small>
-
-  <!-- Loader & Checkmark -->
-  <div id="loader-wrapper">
-    <svg id="loader" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40"/>
-      <path id="checkmark" d="M30 50 L45 65 L70 35"/>
-    </svg>
-    <div style="color:#32cd32; font-weight:bold;">Generating...</div>
-  </div>
 </div>
 
 <script>
@@ -257,7 +229,7 @@ function showRandomTip() {
   tipBox.style.animation = 'fadeInTip 0.5s forwards';
 }
 
-// Very Strong Password Generator
+// Password generator
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -271,7 +243,6 @@ function generatePassword(length, opts){
   if(opts.symbols) pwd.push(symbols[Math.floor(Math.random()*symbols.length)]);
 
   const allChars = lower + (opts.uppercase ? upper : '') + (opts.numbers ? numbers : '') + (opts.symbols ? symbols : '');
-
   while(pwd.length < length){
     pwd.push(allChars[Math.floor(Math.random()*allChars.length)]);
   }
@@ -288,11 +259,7 @@ function generatePassword(length, opts){
 const btn = document.getElementById('generate');
 const numSelect = document.getElementById('numPasswords');
 const container = document.getElementById('passwords-container');
-const loaderWrapper = document.getElementById('loader-wrapper');
-const circle = loaderWrapper.querySelector('circle');
-const check = loaderWrapper.querySelector('#checkmark');
 
-// Button text
 function updateButtonText() {
   const num = parseInt(numSelect.value);
   btn.textContent = num === 1 ? "Generate Password" : "Generate Passwords";
@@ -300,7 +267,7 @@ function updateButtonText() {
 updateButtonText();
 numSelect.addEventListener('change', updateButtonText);
 
-// Generate
+// Generate passwords instantly
 btn.addEventListener('click', ()=>{
   const num = parseInt(numSelect.value);
   const lengthInput = parseInt(document.getElementById('length').value);
@@ -313,58 +280,54 @@ btn.addEventListener('click', ()=>{
 
   showRandomTip();
   container.innerHTML = '';
-  loaderWrapper.style.display = 'flex';
 
-  // Reset loader
-  circle.style.transition = "stroke-dashoffset 3s linear";
-  circle.style.strokeDashoffset = 251.2;
-  check.style.transition = "none";
-  check.style.strokeDashoffset = 34;
+  for(let i=0;i<num;i++){
+    const pwd = generatePassword(length, opts);
 
-  // Animate circle
-  setTimeout(()=>{
-    circle.style.strokeDashoffset = 0;
-  }, 50);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'password-box-wrapper';
 
-  // After 3s, show checkmark & passwords
-  setTimeout(()=>{
-    check.style.transition = "stroke-dashoffset 0.5s ease-out";
-    check.style.strokeDashoffset = 0;
-
-    for(let i=0;i<num;i++){
-      const pwd = generatePassword(length, opts);
-      const pwdDiv = document.createElement('div');
-      pwdDiv.className = 'password-box';
-      pwdDiv.textContent = pwd;
-      pwdDiv.addEventListener('click', ()=>{
-        navigator.clipboard.writeText(pwd).then(()=>{
-          pwdDiv.textContent = 'Copied! ✅';
-          setTimeout(()=>{ pwdDiv.textContent = pwd; },1000);
-        });
+    const pwdDiv = document.createElement('div');
+    pwdDiv.className = 'password-box';
+    pwdDiv.textContent = pwd;
+    pwdDiv.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(pwd).then(()=>{
+        pwdDiv.textContent = 'Copied! ✅';
+        setTimeout(()=>{ pwdDiv.textContent = pwd; },1000);
       });
+    });
 
-      const strengthContainer = document.createElement('div');
-      strengthContainer.className = 'strength-container';
-      const bar = document.createElement('div');
-      bar.className = 'strength-bar';
-      const fill = document.createElement('div');
-      fill.className = 'strength-fill';
-      bar.appendChild(fill);
-      const strengthLabel = document.createElement('div');
-      strengthLabel.className = 'strength-label';
-      strengthLabel.textContent = 'Very Strong';
-      strengthContainer.appendChild(bar);
-      strengthContainer.appendChild(strengthLabel);
+    const eyeBtn = document.createElement('button');
+    eyeBtn.className = 'show-btn';
+    eyeBtn.innerHTML = '👁️';
+    let visible = false;
+    eyeBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      visible = !visible;
+      pwdDiv.style.filter = visible ? 'none' : 'blur(4px)';
+    });
 
-      container.appendChild(pwdDiv);
-      container.appendChild(strengthContainer);
-    }
+    wrapper.appendChild(pwdDiv);
+    wrapper.appendChild(eyeBtn);
 
-    loaderWrapper.style.display = 'none';
-  }, 3050); // slightly over 3s
+    const strengthContainer = document.createElement('div');
+    strengthContainer.className = 'strength-container';
+    const bar = document.createElement('div');
+    bar.className = 'strength-bar';
+    const fill = document.createElement('div');
+    fill.className = 'strength-fill';
+    bar.appendChild(fill);
+    const strengthLabel = document.createElement('div');
+    strengthLabel.className = 'strength-label';
+    strengthLabel.textContent = 'Very Strong';
+    strengthContainer.appendChild(bar);
+    strengthContainer.appendChild(strengthLabel);
+
+    container.appendChild(wrapper);
+    container.appendChild(strengthContainer);
+  }
 });
 
-// Initial tip
 showRandomTip();
 </script>
 </body>
