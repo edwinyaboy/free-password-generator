@@ -161,6 +161,7 @@ button:hover {
   font-weight: bold;
   z-index: 10;
 }
+#length-msg { font-size:0.85rem; color:#aaa; margin-top:4px; }
 small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 </style>
 </head>
@@ -189,7 +190,9 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 
   <label>Password Length:
     <input type="number" id="length" min="6" max="48" value="16">
+    <div id="length-msg"></div>
   </label>
+
   <label><input type="checkbox" id="uppercase" checked>Include Uppercase</label>
   <label><input type="checkbox" id="numbers" checked>Include Numbers</label>
   <label><input type="checkbox" id="symbols" checked>Include Symbols</label>
@@ -201,7 +204,7 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 </div>
 
 <script>
-// Tips array
+// Tips
 const tips = [
   "Use a mix of letters, numbers, and symbols.",
   "Avoid common words or sequences.",
@@ -274,6 +277,8 @@ function generatePassword(length, opts){
 const btn = document.getElementById('generate');
 const numSelect = document.getElementById('numPasswords');
 const container = document.getElementById('passwords-container');
+const lengthInput = document.getElementById('length');
+const lengthMsg = document.getElementById('length-msg');
 
 function updateButtonText() {
   const num = parseInt(numSelect.value);
@@ -282,10 +287,21 @@ function updateButtonText() {
 updateButtonText();
 numSelect.addEventListener('change', updateButtonText);
 
+// Validate length input
+lengthInput.addEventListener('input', () => {
+  const val = parseInt(lengthInput.value);
+  if(val < 6) lengthMsg.textContent = 'Password length must be at least 6.';
+  else if(val > 48) lengthMsg.textContent = 'Password length cannot exceed 48.';
+  else lengthMsg.textContent = '';
+});
+
+// Generate passwords
 btn.addEventListener('click', ()=>{
-  const num = parseInt(numSelect.value);
-  const lengthInput = parseInt(document.getElementById('length').value);
-  const length = Math.min(48, Math.max(6, lengthInput));
+  let num = parseInt(numSelect.value);
+  let lengthVal = parseInt(lengthInput.value);
+  if(lengthVal < 6) lengthVal = 6;
+  if(lengthVal > 48) lengthVal = 48;
+
   const opts = {
     uppercase: document.getElementById('uppercase').checked,
     numbers: document.getElementById('numbers').checked,
@@ -296,7 +312,7 @@ btn.addEventListener('click', ()=>{
   container.innerHTML = '';
 
   for(let i=0;i<num;i++){
-    const pwd = generatePassword(length, opts);
+    const pwd = generatePassword(lengthVal, opts);
 
     const wrapper = document.createElement('div');
     wrapper.className = 'password-box-wrapper';
@@ -305,12 +321,12 @@ btn.addEventListener('click', ()=>{
     pwdDiv.className = 'password-box';
     pwdDiv.textContent = pwd;
 
-    // Copy functionality with separate unblurred message
+    // Copy functionality
     pwdDiv.addEventListener('click', ()=>{
       navigator.clipboard.writeText(pwd).then(()=>{
         const copied = document.createElement('div');
         copied.className = 'copied-msg';
-        copied.textContent = 'Password Copied! ✅';
+        copied.textContent = 'Copied! ✅';
         wrapper.appendChild(copied);
         setTimeout(()=> wrapper.removeChild(copied), 1000);
       });
