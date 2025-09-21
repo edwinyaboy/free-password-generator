@@ -106,6 +106,7 @@ h1 { text-align: center; margin: 0 0 10px 0; }
 /* Inputs & Buttons */
 input[type="number"], select {
   width: 100%;
+  max-width: 100%; /* Ensure consistent width */
   padding: 10px;
   border-radius: 8px;
   border: none;
@@ -113,6 +114,15 @@ input[type="number"], select {
   font-size: 1rem;
   background: #2a2a2a;
   color: #f0f0f0;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Remove default number input arrows for consistency */
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield; /* Remove Firefox number input arrows */
 }
 button {
   padding: 12px;
@@ -137,7 +147,7 @@ button:focus {
 /* Password Boxes */
 .password-box-wrapper {
   display: flex;
-  align-items: center; /* Ensure vertical alignment */
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 6px;
@@ -161,7 +171,7 @@ button:focus {
   user-select: all;
   filter: blur(4px);
   transition: filter 0.2s;
-  min-height: 20px; /* Ensure consistent height for alignment */
+  min-height: 20px;
 }
 .password-box:hover { box-shadow: 0 0 12px rgba(50,205,50,0.6); }
 
@@ -173,7 +183,7 @@ button:focus {
   padding: 2px;
   display: flex;
   align-items: center;
-  height: 24px; /* Consistent height for alignment */
+  height: 24px;
 }
 .show-btn svg, .fav-btn svg, .breach-icon svg { width: 20px; height: 20px; stroke: #4caf50; }
 .fav-btn.favorited svg { fill: #ffeb3b; stroke: #ffeb3b; }
