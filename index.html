@@ -9,28 +9,53 @@
   body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #000000;
+    background: #000000; /* fully black page */
     color: #f0f0f0;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
+    min-height: 100vh;
   }
   h1 {
     margin-bottom: 10px;
     text-align: center;
   }
   .container {
-    background: #1e1e1e;
+    background: #1e1e1e; /* dark gray container for contrast */
     padding: 20px;
     border-radius: 12px;
     max-width: 400px;
     width: 100%;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #tip-box {
+    background: #2a2a2a;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    color: #fff;
+    gap: 8px;
+  }
+  .tip-icon {
+    background: #ffeb3b;
+    color: #000;
+    font-weight: bold;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
   label {
     display: block;
-    margin-top: 12px;
     font-size: 0.9rem;
   }
   input[type="number"] {
@@ -47,8 +72,6 @@
     margin-right: 6px;
   }
   button {
-    margin-top: 16px;
-    width: 100%;
     padding: 10px;
     background: #4caf50;
     color: #fff;
@@ -60,7 +83,7 @@
   }
   button:hover { background: #45a049; }
   #password {
-    margin-top: 16px;
+    margin-top: 8px;
     background: #2a2a2a;
     padding: 10px;
     border-radius: 8px;
@@ -92,15 +115,6 @@
     0% { background-position: 0% 0%; }
     100% { background-position: 100% 0%; }
   }
-  #tip-box {
-    margin-top: 16px;
-    background: #2a2a2a;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    color: #ccc;
-    text-align: center;
-  }
   small {
     display: block;
     margin-top: 6px;
@@ -111,6 +125,11 @@
 <body>
 <h1>Secure Password Generator</h1>
 <div class="container">
+  <div id="tip-box">
+    <div class="tip-icon">!</div>
+    <div id="tip-text">Tip appears here</div>
+  </div>
+
   <label>Password Length:
     <input type="number" id="length" min="6" max="48" value="16">
   </label>
@@ -121,7 +140,6 @@
   <div id="password" title="Click to copy">Click Generate</div>
   <div id="strength"><div id="strength-bar"></div></div>
   <small>Click the password to copy it to clipboard</small>
-  <div id="tip-box"></div>
 </div>
 
 <script>
@@ -155,7 +173,7 @@ function checkStrength(pwd) {
 
 const passwordEl = document.getElementById('password');
 const strengthBar = document.getElementById('strength-bar');
-const tipBox = document.getElementById('tip-box');
+const tipText = document.getElementById('tip-text');
 
 // Password tips array
 const tips = [
@@ -174,7 +192,7 @@ const tips = [
 // Show random tip
 function showRandomTip() {
   const index = Math.floor(Math.random() * tips.length);
-  tipBox.textContent = tips[index];
+  tipText.textContent = tips[index];
 }
 
 // Generate password
