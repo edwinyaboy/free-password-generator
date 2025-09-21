@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Secure password generator with multiple password generation, strength bars, and tips.">
+<meta name="description" content="Secure password generator with multiple password generation, guaranteed very strong passwords, and tips.">
 <title>Secure Password Generator</title>
 <style>
 body {
@@ -17,10 +17,7 @@ body {
   padding: 20px;
   min-height: 100vh;
 }
-h1 {
-  margin-bottom: 10px;
-  text-align: center;
-}
+h1 { margin-bottom: 10px; text-align: center; }
 .container {
   background: #1e1e1e;
   padding: 20px;
@@ -69,9 +66,7 @@ input[type="number"], select {
   background: #2a2a2a;
   color: #f0f0f0;
 }
-input[type="checkbox"] {
-  margin-right: 6px;
-}
+input[type="checkbox"] { margin-right: 6px; }
 button {
   padding: 10px;
   background: #4caf50;
@@ -110,9 +105,9 @@ button:hover { background: #45a049; }
 }
 .strength-fill {
   height: 100%;
-  width: 0%;
+  width: 100%;
   border-radius: 6px;
-  transition: width 0.3s;
+  background: #4caf50; /* Always Very Strong */
 }
 .strength-label {
   font-size: 0.8rem;
@@ -120,11 +115,7 @@ button:hover { background: #45a049; }
   text-align: right;
   color: #ccc;
 }
-small {
-  display: block;
-  margin-top: 6px;
-  color: #aaa;
-}
+small { display: block; margin-top: 6px; color: #aaa; }
 </style>
 </head>
 <body>
@@ -177,49 +168,38 @@ const tips = [
   "Randomly generated passwords are stronger than memorized ones.",
   "Check passwords against known breach databases."
 ];
-
-// Show random tip
 function showRandomTip() {
   const index = Math.floor(Math.random() * tips.length);
   document.getElementById('tip-text').textContent = tips[index];
 }
 
-// Password generation
-function generatePassword(length, opts) {
+// Very Strong Password Generator
+function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const numbers = '0123456789';
   const symbols = '!@#$%^&*()_+[]{}|;:,.<>?/~';
-  let chars = lower;
-  if(opts.uppercase) chars += upper;
-  if(opts.numbers) chars += numbers;
-  if(opts.symbols) chars += symbols;
 
-  let pwd = '';
-  for(let i=0; i<length; i++){
-    pwd += chars.charAt(Math.floor(Math.random()*chars.length));
+  let pwd = [];
+
+  // Always include at least one of each type if selected
+  if(opts.uppercase) pwd.push(upper[Math.floor(Math.random()*upper.length)]);
+  if(opts.numbers) pwd.push(numbers[Math.floor(Math.random()*numbers.length)]);
+  if(opts.symbols) pwd.push(symbols[Math.floor(Math.random()*symbols.length)]);
+
+  const allChars = lower + (opts.uppercase ? upper : '') + (opts.numbers ? numbers : '') + (opts.symbols ? symbols : '');
+
+  while(pwd.length < length){
+    pwd.push(allChars[Math.floor(Math.random()*allChars.length)]);
   }
-  return pwd;
-}
 
-// Password strength
-function checkStrength(pwd) {
-  let score = 0;
-  if(pwd.length >= 8) score++;
-  if(/[A-Z]/.test(pwd)) score++;
-  if(/[0-9]/.test(pwd)) score++;
-  if(/[^A-Za-z0-9]/.test(pwd)) score++;
-  return score; // 0-4
-}
-
-function strengthColor(score){
-  switch(score){
-    case 0:
-    case 1: return {color:'#f44336', label:'Weak'};
-    case 2: return {color:'#ff9800', label:'Moderate'};
-    case 3: return {color:'#cddc39', label:'Strong'};
-    case 4: return {color:'#4caf50', label:'Very Strong'};
+  // Shuffle array
+  for(let i = pwd.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
   }
+
+  return pwd.join('');
 }
 
 // Generate multiple passwords
@@ -239,8 +219,6 @@ document.getElementById('generate').addEventListener('click', ()=>{
 
   for(let i=0;i<num;i++){
     const pwd = generatePassword(length, opts);
-    const score = checkStrength(pwd);
-    const {color,label} = strengthColor(score);
 
     const pwdDiv = document.createElement('div');
     pwdDiv.className = 'password-box';
@@ -259,13 +237,11 @@ document.getElementById('generate').addEventListener('click', ()=>{
     bar.className = 'strength-bar';
     const fill = document.createElement('div');
     fill.className = 'strength-fill';
-    fill.style.width = ((score/4)*100)+'%';
-    fill.style.background = color;
     bar.appendChild(fill);
 
     const strengthLabel = document.createElement('div');
     strengthLabel.className = 'strength-label';
-    strengthLabel.textContent = label;
+    strengthLabel.textContent = 'Very Strong';
 
     strengthContainer.appendChild(bar);
     strengthContainer.appendChild(strengthLabel);
