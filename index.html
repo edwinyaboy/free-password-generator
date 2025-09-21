@@ -27,6 +27,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
 }
 h1 { text-align: center; margin: 0 0 10px 0; }
 #tip-box {
@@ -130,6 +131,40 @@ button:hover {
   color: #ccc;
 }
 small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
+
+/* Circular loader/checkmark */
+#loader-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 100;
+}
+#loader {
+  width: 80px;
+  height: 80px;
+}
+circle {
+  fill: none;
+  stroke: #32cd32;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 251.2; /* 2πr for r=40 */
+  stroke-dashoffset: 251.2;
+  transition: stroke-dashoffset 3s linear;
+}
+#checkmark {
+  stroke-dasharray: 34;
+  stroke-dashoffset: 34;
+  stroke-width: 6;
+  stroke: #32cd32;
+  fill: none;
+  transition: stroke-dashoffset 0.5s ease-out;
+}
 </style>
 </head>
 <body>
@@ -166,10 +201,19 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 
   <div id="passwords-container"></div>
   <small>Click a password to copy it</small>
+
+  <!-- Loader & Checkmark -->
+  <div id="loader-wrapper">
+    <svg id="loader" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="40"/>
+      <path id="checkmark" d="M30 50 L45 65 L70 35"/>
+    </svg>
+    <div style="color:#32cd32; font-weight:bold;">Generating...</div>
+  </div>
 </div>
 
 <script>
-// 30 password tips
+// Tips
 const tips = [
   "Use a mix of letters, numbers, and symbols.",
   "Avoid common words or sequences.",
@@ -209,11 +253,11 @@ function showRandomTip() {
   const tipText = document.getElementById('tip-text');
   tipText.textContent = tips[index];
   tipBox.style.animation = 'none';
-  void tipBox.offsetWidth; // trigger reflow
+  void tipBox.offsetWidth;
   tipBox.style.animation = 'fadeInTip 0.5s forwards';
 }
 
-// Very Strong Password Generator
+// Password generator
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -240,11 +284,15 @@ function generatePassword(length, opts){
   return pwd.join('');
 }
 
+// Elements
 const btn = document.getElementById('generate');
 const numSelect = document.getElementById('numPasswords');
 const container = document.getElementById('passwords-container');
+const loaderWrapper = document.getElementById('loader-wrapper');
+const circle = loaderWrapper.querySelector('circle');
+const check = loaderWrapper.querySelector('#checkmark');
 
-// Button text update
+// Button text
 function updateButtonText() {
   const num = parseInt(numSelect.value);
   btn.textContent = num === 1 ? "Generate Password" : "Generate Passwords";
@@ -252,7 +300,7 @@ function updateButtonText() {
 updateButtonText();
 numSelect.addEventListener('change', updateButtonText);
 
-// Generate passwords
+// Generate
 btn.addEventListener('click', ()=>{
   const num = parseInt(numSelect.value);
   const lengthInput = parseInt(document.getElementById('length').value);
@@ -265,42 +313,54 @@ btn.addEventListener('click', ()=>{
 
   showRandomTip();
   container.innerHTML = '';
+  loaderWrapper.style.display = 'flex';
 
-  for(let i=0;i<num;i++){
-    const pwd = generatePassword(length, opts);
+  // Reset loader
+  circle.style.strokeDashoffset = 251.2;
+  check.style.strokeDashoffset = 34;
 
-    const pwdDiv = document.createElement('div');
-    pwdDiv.className = 'password-box';
-    pwdDiv.textContent = pwd;
-    pwdDiv.addEventListener('click', ()=>{
-      navigator.clipboard.writeText(pwd).then(()=>{
-        pwdDiv.textContent = 'Copied! ✅';
-        setTimeout(()=>{ pwdDiv.textContent = pwd; },1000);
+  // Animate circle
+  setTimeout(()=>{
+    circle.style.strokeDashoffset = 0;
+  }, 50);
+
+  // After 3 seconds, show checkmark and passwords
+  setTimeout(()=>{
+    check.style.strokeDashoffset = 0;
+    // Generate passwords
+    for(let i=0;i<num;i++){
+      const pwd = generatePassword(length, opts);
+      const pwdDiv = document.createElement('div');
+      pwdDiv.className = 'password-box';
+      pwdDiv.textContent = pwd;
+      pwdDiv.addEventListener('click', ()=>{
+        navigator.clipboard.writeText(pwd).then(()=>{
+          pwdDiv.textContent = 'Copied! ✅';
+          setTimeout(()=>{ pwdDiv.textContent = pwd; },1000);
+        });
       });
-    });
+      const strengthContainer = document.createElement('div');
+      strengthContainer.className = 'strength-container';
+      const bar = document.createElement('div');
+      bar.className = 'strength-bar';
+      const fill = document.createElement('div');
+      fill.className = 'strength-fill';
+      bar.appendChild(fill);
+      const strengthLabel = document.createElement('div');
+      strengthLabel.className = 'strength-label';
+      strengthLabel.textContent = 'Very Strong';
+      strengthContainer.appendChild(bar);
+      strengthContainer.appendChild(strengthLabel);
 
-    const strengthContainer = document.createElement('div');
-    strengthContainer.className = 'strength-container';
+      container.appendChild(pwdDiv);
+      container.appendChild(strengthContainer);
+    }
 
-    const bar = document.createElement('div');
-    bar.className = 'strength-bar';
-    const fill = document.createElement('div');
-    fill.className = 'strength-fill';
-    bar.appendChild(fill);
-
-    const strengthLabel = document.createElement('div');
-    strengthLabel.className = 'strength-label';
-    strengthLabel.textContent = 'Very Strong';
-
-    strengthContainer.appendChild(bar);
-    strengthContainer.appendChild(strengthLabel);
-
-    container.appendChild(pwdDiv);
-    container.appendChild(strengthContainer);
-  }
+    loaderWrapper.style.display = 'none';
+  }, 3050); // slightly over 3s to sync checkmark
 });
 
-// Show initial tip
+// Initial tip
 showRandomTip();
 </script>
 </body>
