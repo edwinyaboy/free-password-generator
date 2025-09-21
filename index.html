@@ -21,7 +21,7 @@ body {
   backdrop-filter: blur(8px);
   padding: 25px;
   border-radius: 16px;
-  max-width: 550px;
+  max-width: 650px;
   width: 100%;
   box-shadow: 0 10px 30px rgba(0,255,0,0.1);
   display: flex;
@@ -105,6 +105,10 @@ button:hover {
 }
 .password-box-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .password-box {
   background: #1c1c1c;
@@ -118,32 +122,31 @@ button:hover {
   user-select: all;
   margin-top: 6px;
   transition: 0.2s;
-  box-shadow: 0 2px 8px rgba(0,255,0,0.1);
   filter: blur(4px);
+  flex: 1 1 45%;
+  min-width: 200px;
 }
-.password-box:hover {
-  box-shadow: 0 0 12px rgba(50,205,50,0.6);
-}
-.show-btn {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.password-box:hover { box-shadow: 0 0 12px rgba(50,205,50,0.6); }
+.show-btn, .fav-btn, .breach-icon {
   background: none;
   border: none;
   cursor: pointer;
   padding: 2px;
+  display: flex;
+  align-items: center;
 }
-.show-btn svg {
-  stroke: #4caf50;
+.show-btn svg, .fav-btn svg, .breach-icon svg {
   width: 20px;
   height: 20px;
+  stroke: #4caf50;
 }
+.fav-btn.favorited svg { fill: #ffeb3b; stroke: #ffeb3b; }
 .strength-container {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 4px;
+  flex-wrap: wrap;
 }
 .strength-bar {
   flex: 1;
@@ -158,12 +161,8 @@ button:hover {
   border-radius: 6px;
   background: #4caf50;
 }
-.strength-label {
-  font-size: 0.8rem;
-  min-width: 70px;
-  text-align: right;
-  color: #ccc;
-}
+.strength-label { font-size: 0.8rem; min-width: 70px; text-align: right; color: #ccc; }
+.crack-time { font-size: 0.75rem; color: #aaa; margin-left: 6px; flex-shrink: 0; }
 .copied-msg {
   position: absolute;
   left: 50%;
@@ -178,6 +177,11 @@ button:hover {
 }
 #length-msg { font-size:0.85rem; color:#aaa; margin-top:4px; }
 small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
+/* Responsive for small screens */
+@media (max-width: 500px){
+  .password-box { flex: 1 1 100%; }
+  .strength-container { flex-direction: column; align-items: flex-start; }
+}
 </style>
 </head>
 <body>
@@ -217,47 +221,19 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 
   <button id="generate">Generate Password</button>
 
+  <button id="show-favorites">Show Favorites</button>
+
   <div id="passwords-container"></div>
-  <small>Click a password to copy it</small>
+  <small>Click a password to copy it; long-press on mobile</small>
 </div>
 
 <script>
-// Tips
+// ----- Tips -----
 const tips = [
-  "Use a mix of letters, numbers, and symbols.",
-  "Avoid common words or sequences.",
-  "Do not reuse passwords across accounts.",
-  "Use a password manager for stronger passwords.",
-  "Longer passwords are generally more secure.",
-  "Avoid using personal information.",
-  "Change passwords regularly for sensitive accounts.",
-  "Enable two-factor authentication where possible.",
-  "Randomly generated passwords are stronger than memorized ones.",
-  "Check passwords against known breach databases.",
-  "Use different passwords for email, banking, and social media.",
-  "Avoid keyboard patterns like 'qwerty' or '12345'.",
-  "Include both lowercase and uppercase letters.",
-  "Use at least one number and one symbol.",
-  "Avoid using your birthdate or name.",
-  "Do not share your passwords with anyone.",
-  "Update passwords immediately if a breach occurs.",
-  "Consider using passphrases for memorability.",
-  "Avoid dictionary words alone.",
-  "Never write passwords on paper or sticky notes.",
-  "Use long random strings for crypto wallets.",
-  "Avoid reusing old passwords.",
-  "Combine multiple unrelated words for a passphrase.",
-  "Avoid sequential letters or numbers.",
-  "Use browser password generators safely.",
-  "Consider using hardware password managers for critical accounts.",
-  "Check your passwords against 'Have I Been Pwned'.",
-  "Do not save passwords in plain text files.",
-  "Rotate passwords for work-related accounts.",
-  "Regularly audit saved passwords for security."
+  "Use a mix of letters, numbers, and symbols.","Avoid common words or sequences.","Do not reuse passwords across accounts.","Use a password manager for stronger passwords.","Longer passwords are generally more secure.","Avoid using personal information.","Change passwords regularly for sensitive accounts.","Enable two-factor authentication where possible.","Randomly generated passwords are stronger than memorized ones.","Check passwords against known breach databases.","Use different passwords for email, banking, and social media.","Avoid keyboard patterns like 'qwerty' or '12345'.","Include both lowercase and uppercase letters.","Use at least one number and one symbol.","Avoid using your birthdate or name.","Do not share your passwords with anyone.","Update passwords immediately if a breach occurs.","Consider using passphrases for memorability.","Avoid dictionary words alone.","Never write passwords on paper or sticky notes.","Use long random strings for crypto wallets.","Avoid reusing old passwords.","Combine multiple unrelated words for a passphrase.","Avoid sequential letters or numbers.","Use browser password generators safely.","Consider using hardware password managers for critical accounts.","Check your passwords against 'Have I Been Pwned'.","Do not save passwords in plain text files.","Rotate passwords for work-related accounts.","Regularly audit saved passwords for security."
 ];
-
 function showRandomTip() {
-  const index = Math.floor(Math.random() * tips.length);
+  const index = Math.floor(Math.random()*tips.length);
   const tipBox = document.getElementById('tip-box');
   const tipText = document.getElementById('tip-text');
   tipText.textContent = tips[index];
@@ -265,10 +241,10 @@ function showRandomTip() {
   void tipBox.offsetWidth;
   tipBox.style.animation = 'fadeInTip 0.5s forwards';
 }
-
 document.getElementById('tip-refresh').addEventListener('click', showRandomTip);
+showRandomTip();
 
-// Password generator
+// ----- Password Generation -----
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -285,115 +261,195 @@ function generatePassword(length, opts){
     pwd.push(allChars[Math.floor(Math.random()*allChars.length)]);
   }
 
+  // Shuffle
   for(let i=pwd.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
+    const j=Math.floor(Math.random()*(i+1));
+    [pwd[i],pwd[j]]=[pwd[j],pwd[i]];
   }
 
   return pwd.join('');
 }
 
-// Elements
-const btn = document.getElementById('generate');
-const numSelect = document.getElementById('numPasswords');
-const container = document.getElementById('passwords-container');
-const lengthInput = document.getElementById('length');
-const lengthMsg = document.getElementById('length-msg');
+// ----- Elements -----
+const btn=document.getElementById('generate');
+const numSelect=document.getElementById('numPasswords');
+const container=document.getElementById('passwords-container');
+const lengthInput=document.getElementById('length');
+const lengthMsg=document.getElementById('length-msg');
+const showFavBtn=document.getElementById('show-favorites');
 
-function updateButtonText() {
-  const num = parseInt(numSelect.value);
-  btn.textContent = num === 1 ? "Generate Password" : "Generate Passwords";
+let favorites = JSON.parse(sessionStorage.getItem('favorites')||'[]');
+let showingFav=false;
+
+// Update button text
+function updateButtonText(){
+  const num=parseInt(numSelect.value);
+  btn.textContent = num===1?"Generate Password":"Generate Passwords";
 }
 updateButtonText();
 numSelect.addEventListener('change', updateButtonText);
 
-// Validate length input
-lengthInput.addEventListener('input', () => {
-  const val = parseInt(lengthInput.value);
-  if(val < 6) lengthMsg.textContent = 'Password length must be at least 6.';
-  else if(val > 48) lengthMsg.textContent = 'Password length cannot exceed 48.';
-  else lengthMsg.textContent = '';
+// Length validation
+lengthInput.addEventListener('input',()=>{
+  const val=parseInt(lengthInput.value);
+  if(val<6) lengthMsg.textContent='Password length must be at least 6.';
+  else if(val>48) lengthMsg.textContent='Password length cannot exceed 48.';
+  else lengthMsg.textContent='';
 });
 
-// Generate passwords
-btn.addEventListener('click', ()=>{
-  const num = parseInt(numSelect.value);
-  const lengthVal = parseInt(lengthInput.value);
+// Estimated cracking time (rough)
+function estimateCrackTime(password){
+  const possibleChars = 26 + 26 + 10 + 32; // lower+upper+digits+symbols
+  const entropy=Math.log2(Math.pow(possibleChars,password.length));
+  const guessesPerSec=1e9; // 1 billion/sec
+  const seconds=Math.pow(2,entropy)/guessesPerSec;
+  const years=seconds/(3600*24*365);
+  if(years>1e9) return '~1+ billion years';
+  if(years>1e6) return '~1+ million years';
+  if(years>1e3) return '~1+ thousand years';
+  if(years>1) return '~'+Math.floor(years)+' years';
+  return '<1 year';
+}
 
-  // Block generation if out of range
-  if(lengthVal < 6 || lengthVal > 48){
-    lengthMsg.textContent = lengthVal < 6 ? 
-      'Password length must be at least 6.' : 
-      'Password length cannot exceed 48.';
-    return;
+// Security check using Have I Been Pwned API
+async function checkBreach(password){
+  const sha1=await crypto.subtle.digest('SHA-1', new TextEncoder().encode(password));
+  const hashArray=Array.from(new Uint8Array(sha1));
+  const hashHex=hashArray.map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+  const prefix=hashHex.slice(0,5);
+  const suffix=hashHex.slice(5);
+  try{
+    const res=await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+    const text=await res.text();
+    if(text.includes(suffix)) return true;
+  }catch(e){console.warn(e);}
+  return false;
+}
+
+// Render passwords
+async function renderPasswords(num,lengthVal,opts){
+  container.innerHTML='';
+  for(let i=0;i<num;i++){
+    const pwd=generatePassword(lengthVal,opts);
+
+    const wrapper=document.createElement('div');
+    wrapper.className='password-box-wrapper';
+
+    const pwdDiv=document.createElement('div');
+    pwdDiv.className='password-box';
+    pwdDiv.textContent=pwd;
+
+    // Copy functionality (click & long-press)
+    let pressTimer;
+    pwdDiv.addEventListener('click',()=>{
+      navigator.clipboard.writeText(pwd).then(()=>{
+        const copied=document.createElement('div');
+        copied.className='copied-msg';
+        copied.textContent='Copied! ✅';
+        wrapper.appendChild(copied);
+        setTimeout(()=> wrapper.removeChild(copied),1000);
+      });
+    });
+    pwdDiv.addEventListener('touchstart', e=>{ pressTimer=setTimeout(()=>{ pwdDiv.click(); },500); });
+    pwdDiv.addEventListener('touchend', e=>clearTimeout(pressTimer));
+
+    // Eye toggle
+    const eyeBtn=document.createElement('button');
+    eyeBtn.className='show-btn';
+    eyeBtn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    let visible=false;
+    eyeBtn.addEventListener('click', e=>{ e.stopPropagation(); visible=!visible; pwdDiv.style.filter=visible?'none':'blur(4px)'; });
+
+    // Favorite toggle
+    const favBtn=document.createElement('button');
+    favBtn.className='fav-btn';
+    favBtn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+    if(favorites.includes(pwd)){ favBtn.classList.add('favorited'); }
+    favBtn.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(favorites.includes(pwd)){
+        favorites=favorites.filter(f=>f!==pwd);
+        favBtn.classList.remove('favorited');
+      } else {
+        favorites.push(pwd);
+        favBtn.classList.add('favorited');
+      }
+      sessionStorage.setItem('favorites',JSON.stringify(favorites));
+    });
+
+    // Breach check
+    const breachIcon=document.createElement('button');
+    breachIcon.className='breach-icon';
+    breachIcon.title='Checking breach...';
+    breachIcon.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ff9800" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h0"/></svg>`;
+    checkBreach(pwd).then(isBreach=>{ if(isBreach){ breachIcon.title='Password found in breaches!'; breachIcon.style.stroke='#f44336'; } else breachIcon.title='Password not found in breaches'; });
+
+    wrapper.appendChild(pwdDiv);
+    wrapper.appendChild(eyeBtn);
+    wrapper.appendChild(favBtn);
+    wrapper.appendChild(breachIcon);
+
+    // Strength bar
+    const strengthContainer=document.createElement('div');
+    strengthContainer.className='strength-container';
+    const bar=document.createElement('div');
+    bar.className='strength-bar';
+    const fill=document.createElement('div');
+    fill.className='strength-fill';
+    bar.appendChild(fill);
+    const strengthLabel=document.createElement('div');
+    strengthLabel.className='strength-label';
+    strengthLabel.textContent='Very Strong';
+    const crackTimeDiv=document.createElement('div');
+    crackTimeDiv.className='crack-time';
+    crackTimeDiv.textContent = estimateCrackTime(pwd);
+    strengthContainer.appendChild(bar);
+    strengthContainer.appendChild(strengthLabel);
+    strengthContainer.appendChild(crackTimeDiv);
+    wrapper.appendChild(strengthContainer);
+
+    container.appendChild(wrapper);
   }
+}
 
-  lengthMsg.textContent = '';
-
-  const opts = {
+// Generate button
+btn.addEventListener('click', ()=>{
+  const num=parseInt(numSelect.value);
+  const lengthVal=parseInt(lengthInput.value);
+  if(lengthVal<6 || lengthVal>48){ alert('Password length out of bounds'); return; }
+  const opts={
     uppercase: document.getElementById('uppercase').checked,
     numbers: document.getElementById('numbers').checked,
     symbols: document.getElementById('symbols').checked
   };
-
-  showRandomTip();
-  container.innerHTML = '';
-
-  for(let i=0;i<num;i++){
-    const pwd = generatePassword(lengthVal, opts);
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'password-box-wrapper';
-
-    const pwdDiv = document.createElement('div');
-    pwdDiv.className = 'password-box';
-    pwdDiv.textContent = pwd;
-
-    // Copy functionality
-    pwdDiv.addEventListener('click', ()=>{
-      navigator.clipboard.writeText(pwd).then(()=>{
-        const copied = document.createElement('div');
-        copied.className = 'copied-msg';
-        copied.textContent = 'Copied! ✅';
-        wrapper.appendChild(copied);
-        setTimeout(()=> wrapper.removeChild(copied), 1000);
-      });
-    });
-
-    // Eye toggle
-    const eyeBtn = document.createElement('button');
-    eyeBtn.className = 'show-btn';
-    eyeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-    let visible = false;
-    eyeBtn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      visible = !visible;
-      pwdDiv.style.filter = visible ? 'none' : 'blur(4px)';
-    });
-
-    wrapper.appendChild(pwdDiv);
-    wrapper.appendChild(eyeBtn);
-
-    // Strength bar
-    const strengthContainer = document.createElement('div');
-    strengthContainer.className = 'strength-container';
-    const bar = document.createElement('div');
-    bar.className = 'strength-bar';
-    const fill = document.createElement('div');
-    fill.className = 'strength-fill';
-    bar.appendChild(fill);
-    const strengthLabel = document.createElement('div');
-    strengthLabel.className = 'strength-label';
-    strengthLabel.textContent = 'Very Strong';
-    strengthContainer.appendChild(bar);
-    strengthContainer.appendChild(strengthLabel);
-
-    container.appendChild(wrapper);
-    container.appendChild(strengthContainer);
-  }
+  showingFav=false;
+  renderPasswords(num,lengthVal,opts);
 });
 
-showRandomTip();
+// Show favorites toggle
+showFavBtn.addEventListener('click', ()=>{
+  showingFav=!showingFav;
+  if(showingFav){
+    container.innerHTML='';
+    favorites.forEach(pwd=>{
+      const wrapper=document.createElement('div');
+      wrapper.className='password-box-wrapper';
+      const pwdDiv=document.createElement('div');
+      pwdDiv.className='password-box';
+      pwdDiv.textContent=pwd;
+      pwdDiv.style.filter='blur(4px)';
+      pwdDiv.addEventListener('click',()=>{
+        navigator.clipboard.writeText(pwd);
+      });
+      wrapper.appendChild(pwdDiv);
+      container.appendChild(wrapper);
+    });
+    showFavBtn.textContent='Show All';
+  } else {
+    btn.click();
+    showFavBtn.textContent='Show Favorites';
+  }
+});
 </script>
 </body>
 </html>
