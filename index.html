@@ -190,7 +190,7 @@ const tips = [
 ];
 
 function showRandomTip() {
-  const index = Math.floor(Math.random()*tips.length);
+  const index = Math.floor(Math.random() * tips.length);
   document.getElementById('tip-text').textContent = tips[index];
 }
 
@@ -213,7 +213,6 @@ function generatePassword(length, opts){
     pwd.push(allChars[Math.floor(Math.random()*allChars.length)]);
   }
 
-  // Shuffle
   for(let i=pwd.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
@@ -222,9 +221,26 @@ function generatePassword(length, opts){
   return pwd.join('');
 }
 
-// Generate multiple passwords
-document.getElementById('generate').addEventListener('click', ()=>{
-  const num = parseInt(document.getElementById('numPasswords').value);
+// Elements
+const btn = document.getElementById('generate');
+const numSelect = document.getElementById('numPasswords');
+const container = document.getElementById('passwords-container');
+
+// Update button text based on selection
+function updateButtonText() {
+  const num = parseInt(numSelect.value);
+  btn.textContent = num === 1 ? "Generate Password" : "Generate Passwords";
+}
+
+// Initial update on page load
+updateButtonText();
+
+// Update button when number of passwords changes
+numSelect.addEventListener('change', updateButtonText);
+
+// Generate passwords
+btn.addEventListener('click', ()=>{
+  const num = parseInt(numSelect.value);
   const lengthInput = parseInt(document.getElementById('length').value);
   const length = Math.min(48, Math.max(6, lengthInput));
   const opts = {
@@ -233,13 +249,8 @@ document.getElementById('generate').addEventListener('click', ()=>{
     symbols: document.getElementById('symbols').checked
   };
 
-  // Update button text
-  const btn = document.getElementById('generate');
-  btn.textContent = num===1 ? "Generate Password" : "Generate Passwords";
-
-  const container = document.getElementById('passwords-container');
-  container.innerHTML = '';
   showRandomTip();
+  container.innerHTML = '';
 
   for(let i=0;i<num;i++){
     const pwd = generatePassword(length, opts);
