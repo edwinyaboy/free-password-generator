@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Secure password generator for gamers, crypto users, and OSRS accounts. Generates strong passwords with strength meter and tips.">
+<title>Secure Password Generator</title>
+<style>
+  /* Dark modern theme */
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .container {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  label {
+    display: block;
+    margin-top: 12px;
+    font-size: 0.9rem;
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    margin-top: 4px;
+    font-size: 1rem;
+  }
+  input[type="checkbox"] {
+    margin-right: 6px;
+  }
+  button {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px;
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover { background: #45a049; }
+  #password {
+    margin-top: 16px;
+    background: #2a2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 1.1rem;
+    text-align: center;
+    cursor: pointer;
+    user-select: all;
+  }
+  #strength {
+    height: 10px;
+    width: 100%;
+    background: #333;
+    border-radius: 5px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  #strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+    background: #f44336; /* start red, will change */
+  }
+  small {
+    display: block;
+    margin-top: 6px;
+    color: #aaa;
+  }
+</style>
+</head>
+<body>
+  <h1>Secure Password Generator</h1>
+  <div class="container">
+    <label>Password Length:
+      <input type="number" id="length" min="6" max="64" value="16">
+    </label>
+    <label><input type="checkbox" id="uppercase" checked>Include Uppercase</label>
+    <label><input type="checkbox" id="numbers" checked>Include Numbers</label>
+    <label><input type="checkbox" id="symbols" checked>Include Symbols</label>
+    <button id="generate">Generate Password</button>
+    <div id="password" title="Click to copy">Click Generate</div>
+    <div id="strength"><div id="strength-bar"></div></div>
+    <small>Click the password to copy it to clipboard</small>
+  </div>
+
+<script>
+function generatePassword(length, opts) {
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numbers = '0123456789';
+  const symbols = '!@#$%^&*()_+[]{}|;:,.<>?/~';
+  let chars = lower;
+  if(opts.uppercase) chars += upper;
+  if(opts.numbers) chars += numbers;
+  if(opts.symbols) chars += symbols;
+
+  let pwd = '';
+  for(let i=0; i<length; i++){
+    pwd += chars.charAt(Math.floor(Math.random()*chars.length));
+  }
+  return pwd;
+}
+
+function checkStrength(pwd) {
+  let score = 0;
+  if(pwd.length >= 8) score++;
+  if(/[A-Z]/.test(pwd)) score++;
+  if(/[0-9]/.test(pwd)) score++;
+  if(/[^A-Za-z0-9]/.test(pwd)) score++;
+  return score; // 0-4
+}
+
+const passwordEl = document.getElementById('password');
+const strengthBar = document.getElementById('strength-bar');
+
+document.getElementById('generate').addEventListener('click', ()=>{
+  const length = parseInt(document.getElementById('length').value);
+  const opts = {
+    uppercase: document.getElementById('uppercase').checked,
+    numbers: document.getElementById('numbers').checked,
+    symbols: document.getElementById('symbols').checked
+  };
+  const pwd = generatePassword(length, opts);
+  passwordEl.textContent = pwd;
+
+  // Update strength
+  const score = checkStrength(pwd);
+  const percent = (score/4)*100;
+  strengthBar.style.width = percent+'%';
+  if(score <= 1) strengthBar.style.background='#f44336';
+  else if(score==2) strengthBar.style.background='#ff9800';
+  else if(score==3) strengthBar.style.background='#cddc39';
+  else strengthBar.style.background='#4caf50';
+});
+
+// Copy to clipboard
+passwordEl.addEventListener('click', ()=>{
+  const text = passwordEl.textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    passwordEl.textContent = 'Copied! ✅';
+    setTimeout(()=>{ passwordEl.textContent = text; },1000);
+  });
+});
+</script>
+</body>
+</html>
