@@ -155,7 +155,6 @@ circle {
   stroke-linecap: round;
   stroke-dasharray: 251.2; /* 2πr for r=40 */
   stroke-dashoffset: 251.2;
-  transition: stroke-dashoffset 3s linear;
 }
 #checkmark {
   stroke-dasharray: 34;
@@ -163,7 +162,8 @@ circle {
   stroke-width: 6;
   stroke: #32cd32;
   fill: none;
-  transition: stroke-dashoffset 0.5s ease-out;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 </style>
 </head>
@@ -257,7 +257,7 @@ function showRandomTip() {
   tipBox.style.animation = 'fadeInTip 0.5s forwards';
 }
 
-// Password generator
+// Very Strong Password Generator
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -316,7 +316,9 @@ btn.addEventListener('click', ()=>{
   loaderWrapper.style.display = 'flex';
 
   // Reset loader
+  circle.style.transition = "stroke-dashoffset 3s linear";
   circle.style.strokeDashoffset = 251.2;
+  check.style.transition = "none";
   check.style.strokeDashoffset = 34;
 
   // Animate circle
@@ -324,10 +326,11 @@ btn.addEventListener('click', ()=>{
     circle.style.strokeDashoffset = 0;
   }, 50);
 
-  // After 3 seconds, show checkmark and passwords
+  // After 3s, show checkmark & passwords
   setTimeout(()=>{
+    check.style.transition = "stroke-dashoffset 0.5s ease-out";
     check.style.strokeDashoffset = 0;
-    // Generate passwords
+
     for(let i=0;i<num;i++){
       const pwd = generatePassword(length, opts);
       const pwdDiv = document.createElement('div');
@@ -339,6 +342,7 @@ btn.addEventListener('click', ()=>{
           setTimeout(()=>{ pwdDiv.textContent = pwd; },1000);
         });
       });
+
       const strengthContainer = document.createElement('div');
       strengthContainer.className = 'strength-container';
       const bar = document.createElement('div');
@@ -357,7 +361,7 @@ btn.addEventListener('click', ()=>{
     }
 
     loaderWrapper.style.display = 'none';
-  }, 3050); // slightly over 3s to sync checkmark
+  }, 3050); // slightly over 3s
 });
 
 // Initial tip
