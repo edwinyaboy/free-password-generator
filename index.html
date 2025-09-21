@@ -310,7 +310,7 @@ btn.addEventListener('click', ()=>{
       navigator.clipboard.writeText(pwd).then(()=>{
         const copied = document.createElement('div');
         copied.className = 'copied-msg';
-        copied.textContent = 'Copied! ✅';
+        copied.textContent = 'Password Copied! ✅';
         wrapper.appendChild(copied);
         setTimeout(()=> wrapper.removeChild(copied), 1000);
       });
