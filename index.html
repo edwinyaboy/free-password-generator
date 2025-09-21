@@ -39,12 +39,12 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   font-size: 0.95rem;
 }
 .tip-icon {
-  background: #ffeb3b;
-  color: #000;
+  background: #4caf50;
+  color: #fff;
   font-weight: bold;
   width: 24px;
   height: 24px;
@@ -54,18 +54,27 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   border-radius: 50%;
   flex-shrink: 0;
 }
+#tip-text {
+  flex: 1;
+  line-height: 1.3;
+}
 #tip-refresh {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 2px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: transform 0.3s;
+}
+#tip-refresh:hover {
+  transform: rotate(30deg);
 }
 #tip-refresh svg {
   stroke: #4caf50;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 /* Checkboxes */
@@ -141,7 +150,7 @@ button:focus {
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 6px;
-  padding-bottom: 10px; /* Added for better spacing on small screens */
+  padding-bottom: 10px;
 }
 .password-box-container {
   flex: 1 1 45%;
@@ -193,20 +202,29 @@ button:focus {
 }
 
 /* Strength Indicator */
+.strength-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.strength-label {
+  font-size: 0.9rem;
+  color: #f0f0f0;
+  font-weight: bold;
+}
 .strength-indicator {
-  font-size: 0.85rem;
-  color: #aaa;
-  margin-top: 4px;
-  height: 10px;
-  border-radius: 6px;
+  height: 14px;
+  border-radius: 7px;
   overflow: hidden;
   background: #333;
+  border: 1px solid #4caf50;
 }
 .strength-fill {
   height: 100%;
   width: 0%;
-  transition: width 0.3s;
-  border-radius: 6px;
+  transition: width 0.3s, background 0.3s;
+  border-radius: 7px;
 }
 .strength-weak .strength-fill { background: #f44336; width: 33%; }
 .strength-medium .strength-fill { background: #ffeb3b; width: 66%; }
@@ -225,14 +243,19 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 <body>
 <div class="container">
   <h1>Secure Password Generator</h1>
+  
+  <!-- Tip Box -->
   <div id="tip-box">
-    <div class="tip-icon">!</div>
+    <div class="tip-icon">i</div>
     <div id="tip-text"></div>
     <button id="tip-refresh" title="New Tip" aria-label="Refresh Tip">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 1 1-2.83 2.83M1 1v6h6"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M4 20a8 8 0 0116 0 8 8 0 01-16 0"/>
+      </svg>
     </button>
   </div>
 
+  <!-- Options -->
   <label for="numPasswords">Number of Passwords:</label>
   <select id="numPasswords" aria-label="Select number of passwords to generate"></select>
 
@@ -257,9 +280,11 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
     Show All Passwords
   </label>
 
+  <!-- Buttons -->
   <button id="generate" aria-label="Generate Passwords">Generate Password</button>
   <button id="show-favorites" aria-label="Toggle Show Favorites">Show Favorites</button>
 
+  <!-- Password Container -->
   <div id="passwords-container"></div>
   <small>Click a password to copy it; long-press on mobile</small>
 </div>
@@ -295,7 +320,7 @@ numPasswordsSelect.innerHTML = [...Array(10)].map((_, i) => `<option value="${i 
 // ===== Password Generator =====
 function generatePassword(length, opts) {
   if (!opts.uppercase && !opts.numbers && !opts.symbols) {
-    alert('At least one character type (uppercase, numbers, or symbols) must be selected.');
+    alert('At least one character type must be selected.');
     return null;
   }
   const lower = 'abcdefghijklmnopqrstuvwxyz';
@@ -315,66 +340,12 @@ function generatePassword(length, opts) {
   return pwd.join('');
 }
 
-// ===== SHA-1 Hash =====
-async function sha1(str) {
-  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-}
-
-// ===== Check Breach with Delay for Rate Limiting =====
-async function checkBreach(password, breachIcon) {
-  breachIcon.classList.add('checking');
-  const hash = await sha1(password);
-  const prefix = hash.slice(0, 5);
-  const suffix = hash.slice(5);
-  try {
-    // Add delay to respect API rate limits (1.5s per request)
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
-    if (!res.ok) throw new Error('API error');
-    const text = await res.text();
-    const found = text.split('\n').some(line => line.split(':')[0].trim() === suffix);
-    breachIcon.classList.remove('checking');
-    if (found) {
-      breachIcon.classList.add('breached');
-      breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f44336" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>`;
-      breachIcon.title = 'Breached';
-      breachIcon.setAttribute('aria-label', 'Password has been breached');
-    } else {
-      breachIcon.classList.add('safe');
-      breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>`;
-      breachIcon.title = 'Safe';
-      breachIcon.setAttribute('aria-label', 'Password is safe');
-    }
-  } catch (e) {
-    breachIcon.classList.remove('checking');
-    breachIcon.classList.add('error');
-    breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ff9800" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`;
-    breachIcon.title = 'Error checking breach';
-    breachIcon.setAttribute('aria-label', 'Error checking password breach');
-  }
-}
-
-// ===== Get Password Strength =====
-function getPasswordStrength(pwd) {
-  let score = pwd.length;
-  if (/[A-Z]/.test(pwd)) score += 10;
-  if (/[0-9]/.test(pwd)) score += 10;
-  if (/[^A-Za-z0-9]/.test(pwd)) score += 10;
-  if (score < 20) return { text: 'Weak', class: 'strength-weak' };
-  if (score < 30) return { text: 'Medium', class: 'strength-medium' };
-  return { text: 'Strong', class: 'strength-strong' };
-}
-
 // ===== Render Passwords =====
 function renderPasswords() {
   passwordsContainer.innerHTML = '';
   const num = parseInt(numPasswordsSelect.value);
   const len = parseInt(lengthInput.value);
-  if (len < 6 || len > 48) {
-    document.getElementById('length-msg').textContent = 'Length must be 6–48';
-    return;
-  }
+  if (len < 6 || len > 48) { document.getElementById('length-msg').textContent = 'Length must be 6–48'; return; }
   document.getElementById('length-msg').textContent = '';
 
   const opts = {
@@ -385,7 +356,7 @@ function renderPasswords() {
 
   const items = showingFavorites ? favorites : Array(num).fill().map(() => generatePassword(len, opts)).filter(pwd => pwd !== null);
 
-  if (items.length === 0) return; // No passwords if validation fails
+  if (items.length === 0) return;
 
   items.forEach(pwd => {
     const wrapper = document.createElement('div');
@@ -396,45 +367,15 @@ function renderPasswords() {
 
     const pwdBox = document.createElement('div');
     pwdBox.className = 'password-box';
-    pwdBox.textContent = pwd; // Safe insertion
+    pwdBox.textContent = pwd;
     pwdBox.title = 'Click to copy';
     pwdBox.setAttribute('role', 'textbox');
     pwdBox.setAttribute('aria-readonly', 'true');
     pwdBox.setAttribute('aria-label', `Password: ${pwd} (blurred)`);
-    pwdBox.setAttribute('tabindex', '0'); // Keyboard accessible
-
-    const strength = getPasswordStrength(pwd);
-    const strengthIndicator = document.createElement('div');
-    strengthIndicator.className = `strength-indicator ${strength.class}`;
-    const fill = document.createElement('div');
-    fill.className = 'strength-fill';
-    strengthIndicator.appendChild(fill);
-    strengthIndicator.setAttribute('aria-live', 'polite');
-
-    const showBtn = document.createElement('button');
-    showBtn.className = 'show-btn';
-    showBtn.title = 'Show/Hide Password';
-    showBtn.setAttribute('aria-label', 'Toggle password visibility');
-    showBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12c4-7 16-7 20 0-4 7-16 7-20 0z"/></svg>`;
-
-    const favBtn = document.createElement('button');
-    favBtn.className = `fav-btn ${favorites.includes(pwd) ? 'favorited' : ''}`;
-    favBtn.title = 'Favorite';
-    favBtn.setAttribute('aria-label', 'Toggle favorite');
-    favBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.18L12 21z"/></svg>`;
-
-    const breachIcon = document.createElement('button');
-    breachIcon.className = 'breach-icon checking';
-    breachIcon.title = 'Checking breach';
-    breachIcon.setAttribute('aria-label', 'Checking if password has been breached');
-    breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ffeb3b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`;
+    pwdBox.setAttribute('tabindex', '0');
 
     container.appendChild(pwdBox);
-    container.appendChild(strengthIndicator);
     wrapper.appendChild(container);
-    wrapper.appendChild(showBtn);
-    wrapper.appendChild(favBtn);
-    wrapper.appendChild(breachIcon);
     passwordsContainer.appendChild(wrapper);
 
     pwdBox.addEventListener('click', () => {
@@ -444,66 +385,17 @@ function renderPasswords() {
         msg.textContent = 'Copied!';
         document.body.appendChild(msg);
         setTimeout(() => msg.remove(), 1000);
-      }).catch(err => console.error('Clipboard error:', err));
+      });
     });
-
-    pwdBox.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') pwdBox.click();
-    });
-
-    showBtn.addEventListener('click', () => {
-      const isShown = pwdBox.style.filter === 'blur(0px)';
-      pwdBox.style.filter = isShown ? 'blur(4px)' : 'blur(0px)';
-      pwdBox.setAttribute('aria-label', `Password: ${pwd} (${isShown ? 'blurred' : 'visible'})`);
-    });
-
-    favBtn.addEventListener('click', () => {
-      if (favBtn.classList.contains('favorited')) {
-        favBtn.classList.remove('favorited');
-        favorites = favorites.filter(f => f !== pwd);
-      } else {
-        favBtn.classList.add('favorited');
-        favorites.push(pwd);
-      }
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      if (showingFavorites) renderPasswords();
-    });
-
-    checkBreach(pwd, breachIcon);
-  });
-
-  // Apply showAllPasswords state
-  toggleAllPasswords(showAllPasswordsInput.checked);
-}
-
-// ===== Toggle All Passwords Visibility =====
-function toggleAllPasswords(show) {
-  const passwordBoxes = document.querySelectorAll('.password-box');
-  const showBtns = document.querySelectorAll('.show-btn');
-  passwordBoxes.forEach((box, index) => {
-    const pwd = box.textContent;
-    box.style.filter = show ? 'blur(0px)' : 'blur(4px)';
-    box.setAttribute('aria-label', `Password: ${pwd} (${show ? 'visible' : 'blurred'})`);
-    // Disable individual show buttons when all are shown
-    showBtns[index].disabled = show;
   });
 }
 
 // ===== Events =====
-generateBtn.addEventListener('click', () => {
-  showingFavorites = false;
-  showFavBtn.textContent = 'Show Favorites';
-  renderPasswords();
-});
-
-showFavBtn.addEventListener('click', () => {
-  showingFavorites = !showingFavorites;
-  showFavBtn.textContent = showingFavorites ? 'Show All' : 'Show Favorites';
-  renderPasswords();
-});
-
-showAllPasswordsInput.addEventListener('change', (e) => {
-  toggleAllPasswords(e.target.checked);
+generateBtn.addEventListener('click', () => { showingFavorites = false; showFavBtn.textContent = 'Show Favorites'; renderPasswords(); });
+showFavBtn.addEventListener('click', () => { showingFavorites = !showingFavorites; showFavBtn.textContent = showingFavorites ? 'Show All' : 'Show Favorites'; renderPasswords(); });
+showAllPasswordsInput.addEventListener('change', (e) => { 
+  const boxes = document.querySelectorAll('.password-box'); 
+  boxes.forEach(box => box.style.filter = e.target.checked ? 'blur(0px)' : 'blur(4px)');
 });
 </script>
 </body>
