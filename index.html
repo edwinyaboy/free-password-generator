@@ -116,9 +116,13 @@ button:hover {
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #4caf50;
   cursor: pointer;
-  font-size: 1.1rem;
+  padding: 2px;
+}
+.show-btn svg {
+  stroke: #4caf50;
+  width: 20px;
+  height: 20px;
 }
 .strength-container {
   display: flex;
@@ -144,6 +148,18 @@ button:hover {
   min-width: 70px;
   text-align: right;
   color: #ccc;
+}
+.copied-msg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  background: #32cd32;
+  color: #000;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  z-index: 10;
 }
 small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 </style>
@@ -185,7 +201,7 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 </div>
 
 <script>
-// Tips
+// Tips array
 const tips = [
   "Use a mix of letters, numbers, and symbols.",
   "Avoid common words or sequences.",
@@ -235,7 +251,6 @@ function generatePassword(length, opts){
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const numbers = '0123456789';
   const symbols = '!@#$%^&*()_+[]{}|;:,.<>?/~';
-
   let pwd = [];
 
   if(opts.uppercase) pwd.push(upper[Math.floor(Math.random()*upper.length)]);
@@ -267,7 +282,6 @@ function updateButtonText() {
 updateButtonText();
 numSelect.addEventListener('change', updateButtonText);
 
-// Generate passwords instantly
 btn.addEventListener('click', ()=>{
   const num = parseInt(numSelect.value);
   const lengthInput = parseInt(document.getElementById('length').value);
@@ -290,16 +304,22 @@ btn.addEventListener('click', ()=>{
     const pwdDiv = document.createElement('div');
     pwdDiv.className = 'password-box';
     pwdDiv.textContent = pwd;
+
+    // Copy functionality with separate unblurred message
     pwdDiv.addEventListener('click', ()=>{
       navigator.clipboard.writeText(pwd).then(()=>{
-        pwdDiv.textContent = 'Copied! ✅';
-        setTimeout(()=>{ pwdDiv.textContent = pwd; },1000);
+        const copied = document.createElement('div');
+        copied.className = 'copied-msg';
+        copied.textContent = 'Copied! ✅';
+        wrapper.appendChild(copied);
+        setTimeout(()=> wrapper.removeChild(copied), 1000);
       });
     });
 
+    // Eye toggle
     const eyeBtn = document.createElement('button');
     eyeBtn.className = 'show-btn';
-    eyeBtn.innerHTML = '👁️';
+    eyeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     let visible = false;
     eyeBtn.addEventListener('click', (e)=>{
       e.stopPropagation();
@@ -310,6 +330,7 @@ btn.addEventListener('click', ()=>{
     wrapper.appendChild(pwdDiv);
     wrapper.appendChild(eyeBtn);
 
+    // Strength bar
     const strengthContainer = document.createElement('div');
     strengthContainer.className = 'strength-container';
     const bar = document.createElement('div');
