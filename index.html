@@ -6,11 +6,10 @@
 <meta name="description" content="Secure password generator for gamers, crypto users, and OSRS accounts. Generates strong passwords with strength meter and tips.">
 <title>Secure Password Generator</title>
 <style>
-  /* Dark modern theme */
   body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #121212;
+    background: #000000;
     color: #f0f0f0;
     display: flex;
     flex-direction: column;
@@ -41,6 +40,8 @@
     border: none;
     margin-top: 4px;
     font-size: 1rem;
+    background: #2a2a2a;
+    color: #f0f0f0;
   }
   input[type="checkbox"] {
     margin-right: 6px;
@@ -71,10 +72,10 @@
     user-select: all;
   }
   #strength {
-    height: 10px;
+    height: 12px;
     width: 100%;
     background: #333;
-    border-radius: 5px;
+    border-radius: 6px;
     margin-top: 8px;
     overflow: hidden;
   }
@@ -82,7 +83,23 @@
     height: 100%;
     width: 0%;
     transition: width 0.3s;
-    background: #f44336; /* start red, will change */
+    border-radius: 6px;
+    background: linear-gradient(90deg, #f44336, #ff9800, #cddc39, #4caf50);
+    background-size: 400% 100%;
+    animation: gradientMove 3s linear infinite;
+  }
+  @keyframes gradientMove {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 0%; }
+  }
+  #tip-box {
+    margin-top: 16px;
+    background: #2a2a2a;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #ccc;
+    text-align: center;
   }
   small {
     display: block;
@@ -92,21 +109,23 @@
 </style>
 </head>
 <body>
-  <h1>Secure Password Generator</h1>
-  <div class="container">
-    <label>Password Length:
-      <input type="number" id="length" min="6" max="64" value="16">
-    </label>
-    <label><input type="checkbox" id="uppercase" checked>Include Uppercase</label>
-    <label><input type="checkbox" id="numbers" checked>Include Numbers</label>
-    <label><input type="checkbox" id="symbols" checked>Include Symbols</label>
-    <button id="generate">Generate Password</button>
-    <div id="password" title="Click to copy">Click Generate</div>
-    <div id="strength"><div id="strength-bar"></div></div>
-    <small>Click the password to copy it to clipboard</small>
-  </div>
+<h1>Secure Password Generator</h1>
+<div class="container">
+  <label>Password Length:
+    <input type="number" id="length" min="6" max="48" value="16">
+  </label>
+  <label><input type="checkbox" id="uppercase" checked>Include Uppercase</label>
+  <label><input type="checkbox" id="numbers" checked>Include Numbers</label>
+  <label><input type="checkbox" id="symbols" checked>Include Symbols</label>
+  <button id="generate">Generate Password</button>
+  <div id="password" title="Click to copy">Click Generate</div>
+  <div id="strength"><div id="strength-bar"></div></div>
+  <small>Click the password to copy it to clipboard</small>
+  <div id="tip-box"></div>
+</div>
 
 <script>
+// Password generation
 function generatePassword(length, opts) {
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -124,6 +143,7 @@ function generatePassword(length, opts) {
   return pwd;
 }
 
+// Strength calculation
 function checkStrength(pwd) {
   let score = 0;
   if(pwd.length >= 8) score++;
@@ -135,9 +155,32 @@ function checkStrength(pwd) {
 
 const passwordEl = document.getElementById('password');
 const strengthBar = document.getElementById('strength-bar');
+const tipBox = document.getElementById('tip-box');
 
+// Password tips array
+const tips = [
+  "Use a mix of letters, numbers, and symbols.",
+  "Avoid common words or sequences.",
+  "Do not reuse passwords across accounts.",
+  "Use a password manager for stronger passwords.",
+  "Longer passwords are generally more secure.",
+  "Avoid using personal information.",
+  "Change passwords regularly for sensitive accounts.",
+  "Enable two-factor authentication where possible.",
+  "Randomly generated passwords are stronger than memorized ones.",
+  "Check passwords against known breach databases."
+];
+
+// Show random tip
+function showRandomTip() {
+  const index = Math.floor(Math.random() * tips.length);
+  tipBox.textContent = tips[index];
+}
+
+// Generate password
 document.getElementById('generate').addEventListener('click', ()=>{
-  const length = parseInt(document.getElementById('length').value);
+  const lengthInput = parseInt(document.getElementById('length').value);
+  const length = Math.min(48, Math.max(6, lengthInput));
   const opts = {
     uppercase: document.getElementById('uppercase').checked,
     numbers: document.getElementById('numbers').checked,
@@ -146,17 +189,12 @@ document.getElementById('generate').addEventListener('click', ()=>{
   const pwd = generatePassword(length, opts);
   passwordEl.textContent = pwd;
 
-  // Update strength
   const score = checkStrength(pwd);
   const percent = (score/4)*100;
   strengthBar.style.width = percent+'%';
-  if(score <= 1) strengthBar.style.background='#f44336';
-  else if(score==2) strengthBar.style.background='#ff9800';
-  else if(score==3) strengthBar.style.background='#cddc39';
-  else strengthBar.style.background='#4caf50';
 });
 
-// Copy to clipboard
+// Copy password
 passwordEl.addEventListener('click', ()=>{
   const text = passwordEl.textContent;
   navigator.clipboard.writeText(text).then(()=>{
@@ -164,6 +202,9 @@ passwordEl.addEventListener('click', ()=>{
     setTimeout(()=>{ passwordEl.textContent = text; },1000);
   });
 });
+
+// Show tip on load
+showRandomTip();
 </script>
 </body>
 </html>
