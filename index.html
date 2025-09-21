@@ -264,15 +264,18 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 </div>
 
 <script>
+// ===== Tips =====
 const tips = [
   "Use a mix of letters, numbers, and symbols","Avoid common words or sequences","Do not reuse passwords across accounts","Use a password manager","Longer passwords are generally more secure","Avoid using personal info","Change passwords regularly","Enable 2FA","Randomly generated passwords are stronger","Check passwords against breaches","Use different passwords for email, banking, social media","Avoid keyboard patterns","Include lowercase and uppercase","Use at least one number and one symbol","Avoid using your birthdate or name","Do not share passwords","Update immediately after breach","Consider passphrases","Avoid dictionary words","Never write passwords on paper","Use long random strings","Avoid reusing old passwords","Combine unrelated words","Avoid sequential letters/numbers","Use browser generators safely","Use hardware managers for critical accounts","Check 'Have I Been Pwned'","Do not save passwords in plain text","Rotate work passwords","Audit saved passwords"
 ];
+
 function showRandomTip() {
   document.getElementById('tip-text').textContent = tips[Math.floor(Math.random()*tips.length)];
 }
 document.getElementById('tip-refresh').addEventListener('click', showRandomTip);
 showRandomTip();
 
+// ===== Variables =====
 const passwordsContainer = document.getElementById('passwords-container');
 const generateBtn = document.getElementById('generate');
 const lengthInput = document.getElementById('length');
@@ -286,6 +289,7 @@ const showFavBtn = document.getElementById('show-favorites');
 let favorites = [];
 let showingFavorites = false;
 
+// ===== Password Generator =====
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -304,12 +308,17 @@ function generatePassword(length, opts){
   return pwd.join('');
 }
 
+// ===== Render Passwords =====
 function renderPasswords(){
   passwordsContainer.innerHTML='';
   const num = parseInt(numPasswordsSelect.value);
   const len = parseInt(lengthInput.value);
-  if(len<6||len>48){ document.getElementById('length-msg').textContent='Length must be 6–48'; return;}
+  if(len<6||len>48){ 
+    document.getElementById('length-msg').textContent='Length must be 6–48'; 
+    return;
+  }
   document.getElementById('length-msg').textContent='';
+
   const itemsToShow = showingFavorites ? favorites : Array(num).fill().map(()=>generatePassword(len,{
     uppercase: uppercaseInput.checked,
     numbers: numbersInput.checked,
@@ -336,6 +345,7 @@ function renderPasswords(){
     const favBtn = box.querySelector('.fav-btn');
     const breachIcon = box.querySelector('.breach-icon');
 
+    // Copy password
     pwdBox.addEventListener('click', ()=>{
       navigator.clipboard.writeText(pwd);
       const msg = document.createElement('div');
@@ -345,10 +355,12 @@ function renderPasswords(){
       setTimeout(()=>msg.remove(),1000);
     });
 
+    // Toggle blur
     showBtn.addEventListener('click', ()=>{
       pwdBox.style.filter = pwdBox.style.filter==='blur(0px)'?'blur(4px)':'blur(0px)';
     });
 
+    // Toggle favorites
     favBtn.addEventListener('click', ()=>{
       if(favBtn.classList.contains('favorited')){
         favBtn.classList.remove('favorited');
@@ -360,11 +372,12 @@ function renderPasswords(){
       if(showingFavorites) renderPasswords();
     });
 
-    // Simulated breach check with safe icon
+    // Simulated breach check
     setTimeout(()=>{
       breachIcon.classList.remove('checking');
       if(Math.random()<0.1){
         breachIcon.classList.add('breached');
+        breachIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f44336" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>`;
         breachIcon.title='Breached';
       } else {
         breachIcon.classList.add('safe');
@@ -377,8 +390,8 @@ function renderPasswords(){
   });
 }
 
+// ===== Events =====
 generateBtn.addEventListener('click', ()=>{ showingFavorites=false; renderPasswords(); });
-
 showFavBtn.addEventListener('click', ()=>{
   showingFavorites = !showingFavorites;
   showFavBtn.textContent = showingFavorites?'Show All':'Show Favorites';
