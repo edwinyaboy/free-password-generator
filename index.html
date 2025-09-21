@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Secure Password Generator</title>
 <style>
+/* ===== Body & Container ===== */
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -31,7 +32,7 @@ body {
 }
 h1 { text-align: center; margin: 0 0 10px 0; }
 
-/* Tips box */
+/* ===== Tips Box ===== */
 #tip-box {
   background: #222;
   padding: 12px 16px;
@@ -74,7 +75,7 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   height: 18px;
 }
 
-/* Styled checkboxes */
+/* ===== Styled Checkboxes ===== */
 .checkbox-wrapper {
   display: flex;
   align-items: center;
@@ -104,7 +105,7 @@ h1 { text-align: center; margin: 0 0 10px 0; }
   left: 6px;
 }
 
-/* Inputs and buttons */
+/* ===== Inputs & Buttons ===== */
 input[type="number"], select {
   width: 100%;
   padding: 10px;
@@ -131,7 +132,7 @@ button:hover {
   box-shadow: 0 0 10px #32cd32;
 }
 
-/* Password boxes */
+/* ===== Password Boxes ===== */
 .password-box-wrapper {
   position: relative;
   display: flex;
@@ -157,7 +158,7 @@ button:hover {
 }
 .password-box:hover { box-shadow: 0 0 12px rgba(50,205,50,0.6); }
 
-/* Icon buttons */
+/* ===== Icon Buttons ===== */
 .show-btn, .fav-btn, .breach-icon {
   background: none;
   border: none;
@@ -176,7 +177,7 @@ button:hover {
 .breach-icon.safe svg { stroke: #4caf50; }
 .breach-icon.breached svg { stroke: #f44336; }
 
-/* Strength bar */
+/* ===== Strength Bar ===== */
 .strength-container {
   display: flex;
   align-items: center;
@@ -200,7 +201,7 @@ button:hover {
 .strength-label { font-size: 0.8rem; min-width: 70px; text-align: right; color: #ccc; }
 .crack-time { font-size: 0.75rem; color: #aaa; margin-left: 6px; flex-shrink: 0; }
 
-/* Copied message */
+/* ===== Copied Message ===== */
 .copied-msg {
   position: absolute;
   left: 50%;
@@ -217,7 +218,7 @@ button:hover {
 #length-msg { font-size:0.85rem; color:#aaa; margin-top:4px; }
 small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 
-/* Responsive for small screens */
+/* ===== Responsive ===== */
 @media (max-width: 500px){
   .password-box { flex: 1 1 100%; }
   .strength-container { flex-direction: column; align-items: flex-start; }
@@ -269,7 +270,7 @@ small { display: block; margin-top: 6px; color: #aaa; text-align: center; }
 </div>
 
 <script>
-// ----- Tips -----
+// ===== Tips =====
 const tips = [
   "Use a mix of letters, numbers, and symbols.","Avoid common words or sequences.","Do not reuse passwords across accounts.","Use a password manager for stronger passwords.","Longer passwords are generally more secure.","Avoid using personal information.","Change passwords regularly for sensitive accounts.","Enable two-factor authentication where possible.","Randomly generated passwords are stronger than memorized ones.","Check passwords against known breach databases.","Use different passwords for email, banking, and social media.","Avoid keyboard patterns like 'qwerty' or '12345'.","Include both lowercase and uppercase letters.","Use at least one number and one symbol.","Avoid using your birthdate or name.","Do not share your passwords with anyone.","Update passwords immediately if a breach occurs.","Consider using passphrases for memorability.","Avoid dictionary words alone.","Never write passwords on paper or sticky notes.","Use long random strings for crypto wallets.","Avoid reusing old passwords.","Combine multiple unrelated words for a passphrase.","Avoid sequential letters or numbers.","Use browser password generators safely.","Consider using hardware password managers for critical accounts.","Check your passwords against 'Have I Been Pwned'.","Do not save passwords in plain text files.","Rotate passwords for work-related accounts.","Regularly audit saved passwords for security."
 ];
@@ -285,7 +286,7 @@ function showRandomTip() {
 document.getElementById('tip-refresh').addEventListener('click', showRandomTip);
 showRandomTip();
 
-// ----- Password Generation -----
+// ===== Password Generation =====
 function generatePassword(length, opts){
   const lower = 'abcdefghijklmnopqrstuvwxyz';
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -302,7 +303,6 @@ function generatePassword(length, opts){
     pwd.push(allChars[Math.floor(Math.random()*allChars.length)]);
   }
 
-  // Shuffle
   for(let i=pwd.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [pwd[i],pwd[j]]=[pwd[j],pwd[i]];
@@ -311,8 +311,9 @@ function generatePassword(length, opts){
   return pwd.join('');
 }
 
-// More JS for rendering passwords, favorites, icons, showAllPasswords toggle, breach checks, etc.
-// ... (the same logic from previous code, updated to integrate global showAllPasswords)
+// ===== JS Logic for rendering, favorites, eye toggle, show all, breach check =====
+// (Use the previous JS I gave with full implementation here, integrating `showAllToggle`)
+// Include: renderPasswords(), showCopied(), event listeners for generate, favorites, showAllPasswords
 </script>
 </body>
 </html>
